@@ -61,6 +61,9 @@ void term_putchar(char c)
 		case '\r':
 			term_col = 0;
 			return;
+		case '\b':
+			term_col--;
+			return;
 		default:
 			break;
 	}

@@ -6,5 +6,6 @@ void kernel_main()
 	term_writestring(
 			"Hello, kernel World!\n"
 			"Newlines working!\n"
-			"XXXXXX seems to work\rReturn");
+			"XXXXXX seems to work\rReturn\n"
+			"XXXX\b\b\b\bBackspace works");
 }
