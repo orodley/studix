@@ -7,5 +7,6 @@ void kernel_main()
 			"Hello, kernel World!\n"
 			"Newlines working!\n"
 			"XXXXXX seems to work\rReturn\n"
-			"XXXX\b\b\b\bBackspace works");
+			"XXXX\b\b\b\bBackspace works\n"
+			"\b|");
 }

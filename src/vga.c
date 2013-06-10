@@ -62,7 +62,13 @@ void term_putchar(char c)
 			term_col = 0;
 			return;
 		case '\b':
-			term_col--;
+			if (term_col == 0) {
+				term_col = VGA_WIDTH - 1;
+				term_row--;
+			} else {
+				term_col--;
+			}
+
 			return;
 		default:
 			break;
