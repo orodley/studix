@@ -5,17 +5,17 @@
 static const size_t VGA_WIDTH  = 80;
 static const size_t VGA_HEIGHT = 25;
  
-static size_t    term_row    = 0;
-static size_t    term_col    = 0;
-static uint16_t *term_buffer = (uint16_t*) 0xB8000;
-static uint8_t   term_color;
+static size_t          curr_y      = 0;
+static size_t          curr_x      = 0;
+static uint16_t *const term_buffer = (uint16_t*)0xB8000;
+static uint8_t         term_color;
  
 uint8_t make_color(enum VGAColor fg, enum VGAColor bg)
 {
 	return fg | bg << 4;
 }
  
-uint16_t make_vgaentry(char c, uint8_t color)
+uint16_t make_vga_entry(char c, uint8_t color)
 {
 	uint16_t c16     = c;
 	uint16_t color16 = color;
@@ -32,21 +32,21 @@ size_t strlen(const char *str)
 	return len;
 }
  
-void term_putentryat(char c, uint8_t color, size_t x, size_t y)
+static void term_put_entry(char c, uint8_t color, size_t x, size_t y)
 {
-	term_buffer[y * VGA_WIDTH + x] = make_vgaentry(c, color);
+	term_buffer[y * VGA_WIDTH + x] = make_vga_entry(c, color);
 }
  
 void init_term()
 {
-	term_color  = make_color(COLOR_LIGHT_GREY, COLOR_BLACK);
+	term_color  = make_color(LIGHT_GREY, BLACK);
 
 	for (size_t y = 0; y < VGA_HEIGHT; y++)
 		for (size_t x = 0; x < VGA_WIDTH; x++)
-			term_putentryat(' ', term_color, x, y);
+			term_put_entry(' ', term_color, x, y);
 }
  
-void term_setcolor(uint8_t color)
+void term_set_color(uint8_t color)
 {
 	term_color = color;
 }
@@ -54,37 +54,37 @@ void term_setcolor(uint8_t color)
 void term_putchar(char c)
 {
 	switch (c) {
-		case '\n':
-			term_col = 0;
-			term_row++;
-			return;
-		case '\r':
-			term_col = 0;
-			return;
-		case '\b':
-			if (term_col == 0) {
-				term_col = VGA_WIDTH - 1;
-				term_row--;
-			} else {
-				term_col--;
-			}
+	case '\n':
+		curr_x = 0;
+		curr_y++;
+		return;
+	case '\r':
+		curr_x = 0;
+		return;
+	case '\b':
+		if (curr_x == 0) {
+			curr_x = VGA_WIDTH - 1;
+			curr_y--;
+		} else {
+			curr_x--;
+		}
 
-			return;
-		default:
-			break;
+		return;
+	default:
+		break;
 	}
 
-	term_putentryat(c, term_color, term_col, term_row);
+	term_put_entry(c, term_color, curr_x, curr_y);
 
-	if (++term_col == VGA_WIDTH) {
-		term_col = 0;
+	if (++curr_x == VGA_WIDTH) {
+		curr_x = 0;
 
-		if (++term_row == VGA_HEIGHT)
-			term_row = 0;
+		if (++curr_y == VGA_HEIGHT)
+			curr_y = 0;
 	}
 }
  
-void term_writestring(const char *str)
+void term_puts(const char *str)
 {
 	for (size_t i = 0; i < strlen(str); i++)
 		term_putchar(str[i]);
