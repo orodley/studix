@@ -88,4 +88,6 @@ void term_puts(const char *str)
 {
 	for (size_t i = 0; i < strlen(str); i++)
 		term_putchar(str[i]);
+
+	term_putchar('\n');
 }
