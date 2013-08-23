@@ -17,12 +17,12 @@ all: $(NAME).iso
 run: $(NAME).iso
 	$(EMU) -cdrom $(NAME).iso
 
-$(NAME).iso: $(NAME).bin grub.cfg
+$(NAME).iso: $(NAME).bin make_grub_cfg.sh
 	@echo
 	@echo Generating disk image...
 	mkdir -p isodir/boot/grub
 	cp $(NAME).bin isodir/boot/
-	cp grub.cfg isodir/boot/grub
+	./make_grub_cfg.sh $(NAME)
 	grub-mkrescue -o $@ isodir
 
 $(NAME).bin: linker.ld $(OBJS)
