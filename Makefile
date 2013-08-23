@@ -1,8 +1,9 @@
+# TODO: Append git commit SHA1
 NAME     = simple-kernel
 CC       = i586-elf-gcc
 LD       = $(CC)
 AS       = i586-elf-as
-CFLAGS   = -c -std=c99 -ffreestanding -Wall -Wextra -Werror
+CFLAGS   = -c -std=c99 -ffreestanding -Wall -Wextra -Werror -DNAME=\"$(NAME)\"
 LDFLAGS  = -ffreestanding -nostdlib -lgcc
 EMU      = qemu-system-i386
 SRC_DIR  = src

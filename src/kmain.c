@@ -3,10 +3,5 @@
 void kernel_main()
 {
 	init_term();
-	term_puts(
-			"Hello, kernel World!\n"
-			"Newlines working!\n"
-			"XXXXXX seems to work\rReturn\n"
-			"XXXX\b\b\b\bBackspace works\n"
-			"\b|");
+	term_puts(NAME " booting...");
 }
