@@ -7,10 +7,8 @@ LDFLAGS  = -ffreestanding -nostdlib -lgcc
 EMU      = qemu-system-i386
 SRC_DIR  = src
 VPATH    = $(SRC_DIR)
-ASM_SRC  = $(wildcard $(SRC_DIR)/*.s)
-C_SRC    = $(wildcard $(SRC_DIR)/*.c)
-ASM_OBJS = $(patsubst %.s, %.o, $(ASM_SRC))
-C_OBJS   = $(patsubst %.c, %.o, $(C_SRC))
+ASM_OBJS = $(patsubst %.s, %.o, $(wildcard $(SRC_DIR)/*.s))
+C_OBJS   = $(patsubst %.c, %.o, $(wildcard $(SRC_DIR)/*.c))
 OBJS     = $(C_OBJS) $(ASM_OBJS)
 
 .PHONY: all run clean
