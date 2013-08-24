@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "vga.h"
+#include "lib/string.h"
  
 static const size_t VGA_WIDTH  = 80;
 static const size_t VGA_HEIGHT = 25;
@@ -21,15 +22,6 @@ uint16_t make_vga_entry(char c, uint8_t color)
 	uint16_t color16 = color;
 
 	return c16 | color16 << 8;
-}
- 
-size_t strlen(const char *str)
-{
-	size_t len = 0;
-	while (str[len++] != '\0')
-		;
-
-	return len;
 }
  
 static void term_put_entry(char c, uint8_t color, size_t x, size_t y)

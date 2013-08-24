@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "idt.h"
+#include "lib/string.h"
 
 typedef struct IDT_entry
 {
@@ -34,15 +35,6 @@ extern void flush_idt(uint32_t);
 
 IDT_entry idt_entries[NUM_IDT_ENTRIES];
 IDT_ptr   idt;
-
-// TODO: Move to string.h in lib/ dir
-void *memset(void *s, int c, size_t n)
-{
-	for (size_t i = 0; i < n; i++)
-		((uint8_t*)s)[i] = c;
-
-	return s;
-}
 
 static void set_idt_entry(uint8_t i, uint32_t base, uint16_t selector,
 		uint8_t flags)

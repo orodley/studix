@@ -8,8 +8,8 @@ LDFLAGS  = -ffreestanding -nostdlib -lgcc
 EMU      = qemu-system-i386
 SRC_DIR  = src
 VPATH    = $(SRC_DIR)
-ASM_OBJS = $(patsubst %.s, %.o, $(wildcard $(SRC_DIR)/*.s))
-C_OBJS   = $(patsubst %.c, %.o, $(wildcard $(SRC_DIR)/*.c))
+ASM_OBJS = $(patsubst %.s, %.o, $(shell find $(SRC_DIR) -name '*.s'))
+C_OBJS   = $(patsubst %.c, %.o, $(shell find $(SRC_DIR) -name '*.c'))
 OBJS     = $(C_OBJS) $(ASM_OBJS)
 
 .PHONY: all run clean
@@ -31,6 +31,6 @@ $(NAME).bin: linker.ld $(OBJS)
 
 
 clean:
-	rm -f *.o $(SRC_DIR)/*.o
+	rm -f `find . -type f -name '*.o'`
 	rm -f $(NAME).bin $(NAME).iso
 	rm -rf isodir
