@@ -31,6 +31,12 @@ void term_printf(const char *fmt, ...)
 	    case 'd':
 		term_print_dec(va_arg(args, int));
 		break;
+	    case 's':
+		term_putsn(va_arg(args, char*));
+		break;
+	    case 'c':
+		term_putchar(va_arg(args, int));
+		break;
 	    default:
 		break;
 	    }

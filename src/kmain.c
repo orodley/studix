@@ -13,5 +13,5 @@ void kernel_main()
 	term_puts("Initializing IDT...");
 	init_idt();
 
-	term_printf("%d%% pure awesome", 100);
+	term_printf("%d%% p%cre %s", 100, 'u', "awesome");
 }
