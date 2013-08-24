@@ -1,7 +1,7 @@
 .global flush_gdt
 flush_gdt:
 	movl	4(%esp), %eax	# Get GDT pointer
-	lgdt	0(%eax)
+	lgdt	(%eax)
 
 	mov	$0x10, %ax	# 0x10 is the GDT offset to the data segment
 	# Load the data segment registers

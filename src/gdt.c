@@ -25,9 +25,9 @@ typedef struct GDT_ptr
 
 extern void flush_gdt(uint32_t);
 
-#define NUM_ENTRIES 5
+#define NUM_GDT_ENTRIES 5
 
-static GDT_entry gdt_entries[NUM_ENTRIES];
+static GDT_entry gdt_entries[NUM_GDT_ENTRIES];
 static GDT_ptr   gdt;
 
 static void set_gdt_entry(size_t i, uint32_t base, uint32_t limit,
@@ -39,7 +39,7 @@ static void set_gdt_entry(size_t i, uint32_t base, uint32_t limit,
 
 	gdt_entries[i].limit_low = limit & 0xFFFF;
 
-	gdt_entries[i].gran      = (limit >> 16) & 0x0F;
+	gdt_entries[i].gran      = (limit >> 16) & 0xF;
 	gdt_entries[i].gran     |= gran & 0xF0;
 
 	gdt_entries[i].access    = access;
@@ -47,7 +47,7 @@ static void set_gdt_entry(size_t i, uint32_t base, uint32_t limit,
 
 void init_gdt()
 {
-	gdt.limit = (sizeof(GDT_entry) * NUM_ENTRIES) - 1;
+	gdt.limit = (sizeof(GDT_entry) * NUM_GDT_ENTRIES) - 1;
 	gdt.base  = (uint32_t)&gdt_entries;
 
 	set_gdt_entry(0, 0, 0,          0,    0);    // Null segment
