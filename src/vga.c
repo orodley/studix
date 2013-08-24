@@ -78,7 +78,7 @@ void term_putchar(char c)
  
 void term_putsn(const char *str)
 {
-    for (size_t i = 0; i < strlen(str); i++)
+    for (size_t i = 0; str[i] != '\0'; i++)
 	term_putchar(str[i]);
 }
 
