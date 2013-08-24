@@ -1,4 +1,4 @@
-NAME     = simple-kernel
+NAME     = studix
 NAME    := $(NAME)-$(shell git describe)
 CC       = i586-elf-gcc
 LD       = $(CC)
