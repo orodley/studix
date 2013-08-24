@@ -12,6 +12,6 @@ void kernel_main()
 	term_puts("Initializing IDT...");
 	init_idt();
 
-	// Test out ISR functionality (doesn't work yet)
-	//__asm__ volatile ("int $3");
+	// Test out ISR functionality
+	__asm__ volatile ("int $3");
 }

@@ -39,7 +39,7 @@ IDT_ptr   idt;
 void *memset(void *s, int c, size_t n)
 {
 	for (size_t i = 0; i < n; i++)
-		((int*)s)[i] = c;
+		((uint8_t*)s)[i] = c;
 
 	return s;
 }
