@@ -16,7 +16,7 @@ OBJS     = $(C_OBJS) $(ASM_OBJS)
 all: $(NAME).iso
 
 run: $(NAME).iso
-	$(EMU) -cdrom $(NAME).iso
+	$(EMU) -boot order=d -cdrom $(NAME).iso
 
 $(NAME).iso: $(NAME).bin make_grub_cfg.sh
 	@echo
