@@ -1,6 +1,7 @@
 #include "gdt.h"
 #include "idt.h"
 #include "vga.h"
+#include "term_printf.h"
 
 void kernel_main()
 {
@@ -12,6 +13,5 @@ void kernel_main()
 	term_puts("Initializing IDT...");
 	init_idt();
 
-	// Test out ISR functionality
-	__asm__ volatile ("int $3");
+	term_printf("100%% pure awesome");
 }
