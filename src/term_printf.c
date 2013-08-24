@@ -18,32 +18,32 @@ static void term_print_dec(int x)
 
 void term_printf(const char *fmt, ...)
 {
-    va_list args;
-    va_start(args, fmt);
+	va_list args;
+	va_start(args, fmt);
 
-    for (int i = 0; fmt[i] != '\0'; i++) {
-	if (fmt[i] != '%') {
-	    term_putchar(fmt[i]);
-	} else {
-	    char fmt_type = fmt[++i];
-	    switch (fmt_type) {
-	    case '%':
-		term_putchar('%');
-		break;
-	    case 'd':
-		term_print_dec(va_arg(args, int));
-		break;
-	    case 's':
-		term_putsn(va_arg(args, char*));
-		break;
-	    case 'c':
-		term_putchar(va_arg(args, int));
-		break;
-	    default:
-		break;
-	    }
+	for (int i = 0; fmt[i] != '\0'; i++) {
+		if (fmt[i] != '%') {
+			term_putchar(fmt[i]);
+		} else {
+			char fmt_type = fmt[++i];
+			switch (fmt_type) {
+			case '%':
+				term_putchar('%');
+				break;
+			case 'd':
+				term_print_dec(va_arg(args, int));
+				break;
+			case 's':
+				term_putsn(va_arg(args, char*));
+				break;
+			case 'c':
+				term_putchar(va_arg(args, int));
+				break;
+			default:
+				break;
+			}
+		}
 	}
-    }
 
-    va_end(args);
+	va_end(args);
 }
