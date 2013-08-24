@@ -84,10 +84,14 @@ void term_putchar(char c)
 	}
 }
  
+void term_putsn(const char *str)
+{
+    for (size_t i = 0; i < strlen(str); i++)
+	term_putchar(str[i]);
+}
+
 void term_puts(const char *str)
 {
-	for (size_t i = 0; i < strlen(str); i++)
-		term_putchar(str[i]);
-
-	term_putchar('\n');
+    term_putsn(str);
+    term_putchar('\n');
 }

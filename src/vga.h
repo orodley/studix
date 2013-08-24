@@ -22,8 +22,9 @@ enum VGAColor
 	WHITE         = 15,
 };
 
-void term_puts(const char *data);
 void term_putchar(char c);
+void term_puts(const char *data);
+void term_putsn(const char *data);
 void term_set_color(uint8_t color);
 void init_term();
 uint8_t make_color(enum VGAColor fg, enum VGAColor bg);
