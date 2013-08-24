@@ -1,5 +1,5 @@
-# TODO: Append git commit SHA1
 NAME     = simple-kernel
+NAME    := $(NAME)-$(shell git describe)
 CC       = i586-elf-gcc
 LD       = $(CC)
 AS       = i586-elf-as
@@ -36,6 +36,6 @@ $(NAME).bin: linker.ld $(OBJS)
 
 clean:
 	rm -f `find . -type f -name '*.o'`
-	rm -f $(NAME).bin $(NAME).iso
+	rm -f *.bin *.iso
 	rm -f bochsrc
 	rm -rf isodir
