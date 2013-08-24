@@ -13,5 +13,7 @@ void kernel_main()
 	term_puts("Initializing IDT...");
 	init_idt();
 
-	term_printf("%d%% p%cre %s", 100, 'u', "awesome");
+	term_printf("term_printf is %d%% p%cre %s\n", 100, 'u', "awesome");
+
+	__asm__ volatile ("int $2");
 }

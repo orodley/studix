@@ -1,7 +1,7 @@
 // ISR handler
 
 #include <stdint.h>
-#include "vga.h"
+#include "term_printf.h"
 
 // Represents the registers we push onto the stack in isr_common (isrs.s)
 typedef struct Registers
@@ -12,7 +12,5 @@ typedef struct Registers
 
 void isr_handler(Registers regs)
 {
-	term_puts("Recieved interrupt");
-	// Frob regs to avoid compiler warning; we'll actually use them later
-	regs.ds = regs.ds; 
+	term_printf("Unhandled interrupt: %d", regs.int_no);
 }
