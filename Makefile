@@ -12,18 +12,22 @@ ASM_OBJS = $(patsubst %.s, %.o, $(shell find $(SRC_DIR) -name '*.s'))
 C_OBJS   = $(patsubst %.c, %.o, $(shell find $(SRC_DIR) -name '*.c'))
 OBJS     = $(C_OBJS) $(ASM_OBJS)
 
-.PHONY: all run clean
+.PHONY: all run clean bochs
+
 all: $(NAME).iso
 
 run: $(NAME).iso
 	$(EMU) -boot order=d -cdrom $(NAME).iso
 
-$(NAME).iso: $(NAME).bin make_grub_cfg.sh
+bochs: $(NAME).iso
+	bochs
+
+$(NAME).iso: $(NAME).bin make_config_files.sh
 	@echo
 	@echo Generating disk image...
 	mkdir -p isodir/boot/grub
 	cp $(NAME).bin isodir/boot/
-	./make_grub_cfg.sh $(NAME)
+	./make_config_files.sh $(NAME)
 	grub-mkrescue -o $@ isodir
 
 $(NAME).bin: linker.ld $(OBJS)
@@ -33,4 +37,5 @@ $(NAME).bin: linker.ld $(OBJS)
 clean:
 	rm -f `find . -type f -name '*.o'`
 	rm -f $(NAME).bin $(NAME).iso
+	rm -f bochsrc
 	rm -rf isodir
