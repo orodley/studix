@@ -1,7 +1,8 @@
 #include "gdt.h"
 #include "idt.h"
-#include "vga.h"
 #include "term_printf.h"
+#include "timer.h"
+#include "vga.h"
 
 void notify(void (*func)(), char *str)
 {
@@ -17,6 +18,10 @@ void kernel_main()
 
 	notify(init_gdt, "Initializing GDT...");
 	notify(init_idt, "Initializing IDT...");
+
+	term_putsn("Initializing PIT...");
+	init_timer(50);
+	term_puts(" done");
 
 	term_printf("term_printf is %d%% p%cre %s\n", 100, 'u', "awesome");
 
