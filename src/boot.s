@@ -26,13 +26,12 @@ stack_top:
 .global _start
 _start:
 	# Set up the stack
-	movl $stack_top, %esp
+	movl 	$stack_top, %esp
 
 	# Jump to kernel entry point
-	call kernel_main
+	call 	kernel_main
 
 	# If the function returns, put the computer into an infinite loop.
-	cli
-hang:
-	hlt
-	jmp hang
+	sti
+loop:
+	jmp	loop
