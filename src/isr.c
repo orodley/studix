@@ -1,14 +1,8 @@
 // ISR handler
 
 #include <stdint.h>
+#include "isr.h"
 #include "term_printf.h"
-
-// Represents the registers we push onto the stack in isr_common (isrs.s)
-typedef struct Registers
-{
-	uint32_t ds, edi, esi, ebp, esp, ebx, edx, ecx, eax,
-		int_no, err, eip, cs, eflags, useresp, ss;
-} Registers;
 
 static const char *interrupt_names[] =
 {

@@ -7,6 +7,7 @@ isr_common:
 	mov	%ds, %ax
 	push	%eax
 
+	# Load kernel mode segments
 	mov	$0x10, %ax
 	mov	%ax, %ds
 	mov	%ax, %es
@@ -27,22 +28,60 @@ isr_common:
 	sti
 	iret
 
+# Common function called by all IRQs
+irq_common:
+	# Push all the registers we want to back up
+	pusha
+	mov	%ds, %ax
+	push	%eax
 
+	# Load kernel mode segments
+	mov	$0x10, %ax
+	mov	%ax, %ds
+	mov	%ax, %es
+	mov	%ax, %fs
+	mov	%ax, %gs
+
+	call	irq_handler	# Call our C ISR handler
+
+	# Restore all the registers we backed up
+	pop	%eax
+	mov	%ax, %ds
+	mov	%ax, %es
+	mov	%ax, %fs
+	mov	%ax, %gs
+
+	popa
+	addl	$8, %esp
+	sti
+	iret
+
+# Macro for ISRs that don't push an error code; we need to push a dummy one
 .macro ISR_NO_ERR num
 	.global isr\num
 	isr\num:
 		cli
-		push $0
-		push $\num
-		jmp isr_common
+		push 	$0
+		push 	$\num
+		jmp 	isr_common
 .endm
 
+# Macro for ISRs that push an error code
 .macro ISR_ERR num
 	.global isr\num
 	isr\num:
 		cli
-		push $\num
-		jmp isr_common
+		push 	$\num
+		jmp 	isr_common
+.endm
+
+# Macro for IRQs; different stub
+.macro IRQ num
+	.global isr\num
+	isr\num:
+		cli
+		push 	$\num
+		jmp 	irq_common
 .endm
 
 # Create all the ISRs
@@ -79,3 +118,20 @@ ISR_NO_ERR 28
 ISR_NO_ERR 29
 ISR_NO_ERR 30
 ISR_NO_ERR 31
+# IRQ handlers
+IRQ 32
+IRQ 33
+IRQ 34
+IRQ 35
+IRQ 36
+IRQ 37
+IRQ 38
+IRQ 39
+IRQ 40
+IRQ 41
+IRQ 42
+IRQ 43
+IRQ 44
+IRQ 45
+IRQ 46
+IRQ 47
