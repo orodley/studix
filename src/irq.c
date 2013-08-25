@@ -9,7 +9,7 @@ static Handler handlers[NUM_IDT_ENTRIES];
 
 void irq_handler(Registers regs)
 {
-    if (regs.int_no >= 40) {
+    if (regs.int_no >= IRQ8) {
 	// This interrupt involved the slave, send reset to it
 	outb(0xA0, 0x20);
     }
