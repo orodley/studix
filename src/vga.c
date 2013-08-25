@@ -42,13 +42,32 @@ void term_set_color(uint8_t color)
 {
 	term_color = color;
 }
+
+static uint16_t entry_at(size_t x, size_t y)
+{
+	return term_buffer[y * VGA_WIDTH + x];
+}
+
+static void term_scroll()
+{
+	for (size_t y = 0; y < VGA_HEIGHT - 1; y++)
+		for (size_t x = 0; x < VGA_WIDTH; x++)
+			term_buffer[y * VGA_WIDTH + x] = entry_at(x, y + 1);
+
+	for (size_t x = 0; x < VGA_WIDTH; x++)
+		term_put_entry(' ', make_color(BLACK, BLACK), x, VGA_HEIGHT - 1);
+
+	curr_x = 0;
+	curr_y = VGA_HEIGHT - 1;
+}
  
 void term_putchar(char c)
 {
 	switch (c) {
 	case '\n':
 		curr_x = 0;
-		curr_y++;
+		if (++curr_y == VGA_HEIGHT)
+			term_scroll();
 		return;
 	case '\r':
 		curr_x = 0;
@@ -68,22 +87,18 @@ void term_putchar(char c)
 
 	term_put_entry(c, term_color, curr_x, curr_y);
 
-	if (++curr_x == VGA_WIDTH) {
-		curr_x = 0;
-
-		if (++curr_y == VGA_HEIGHT)
-			curr_y = 0;
-	}
+	if (++curr_x == VGA_WIDTH)
+		term_putchar('\n');
 }
  
 void term_putsn(const char *str)
 {
-    for (size_t i = 0; str[i] != '\0'; i++)
-	term_putchar(str[i]);
+	for (size_t i = 0; str[i] != '\0'; i++)
+		term_putchar(str[i]);
 }
 
 void term_puts(const char *str)
 {
-    term_putsn(str);
-    term_putchar('\n');
+	term_putsn(str);
+	term_putchar('\n');
 }
