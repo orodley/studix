@@ -2,20 +2,20 @@
 #include <stdint.h>
 #include "vga.h"
 #include "lib/string.h"
- 
+
 static const size_t VGA_WIDTH  = 80;
 static const size_t VGA_HEIGHT = 25;
- 
+
 static size_t          curr_y      = 0;
 static size_t          curr_x      = 0;
 static uint16_t *const term_buffer = (uint16_t*)0xB8000;
 static uint8_t         term_color;
- 
+
 uint8_t make_color(enum VGAColor fg, enum VGAColor bg)
 {
 	return fg | bg << 4;
 }
- 
+
 uint16_t make_vga_entry(char c, uint8_t color)
 {
 	uint16_t c16     = c;
@@ -23,12 +23,12 @@ uint16_t make_vga_entry(char c, uint8_t color)
 
 	return c16 | color16 << 8;
 }
- 
+
 static void term_put_entry(char c, uint8_t color, size_t x, size_t y)
 {
 	term_buffer[y * VGA_WIDTH + x] = make_vga_entry(c, color);
 }
- 
+
 void init_term()
 {
 	term_color  = make_color(LIGHT_GREY, BLACK);
@@ -37,7 +37,7 @@ void init_term()
 		for (size_t x = 0; x < VGA_WIDTH; x++)
 			term_put_entry(' ', term_color, x, y);
 }
- 
+
 void term_set_color(uint8_t color)
 {
 	term_color = color;
@@ -60,7 +60,7 @@ static void term_scroll()
 	curr_x = 0;
 	curr_y = VGA_HEIGHT - 1;
 }
- 
+
 void term_putchar(char c)
 {
 	switch (c) {
@@ -90,7 +90,7 @@ void term_putchar(char c)
 	if (++curr_x == VGA_WIDTH)
 		term_putchar('\n');
 }
- 
+
 void term_putsn(const char *str)
 {
 	for (size_t i = 0; str[i] != '\0'; i++)

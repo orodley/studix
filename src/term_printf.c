@@ -5,15 +5,15 @@
 
 static void term_print_dec(int x)
 {
-    int divisor = 1;
+	int divisor = 1;
 
-    for (; divisor <= x; divisor *= 10)
-	;
+	for (; divisor <= x; divisor *= 10)
+		;
 
-    divisor /= 10;
+	divisor /= 10;
 
-    for (; divisor > 0; divisor /= 10)
-	term_putchar(((x / divisor) % 10) + '0');
+	for (; divisor > 0; divisor /= 10)
+		term_putchar(((x / divisor) % 10) + '0');
 }
 
 void term_printf(const char *fmt, ...)
