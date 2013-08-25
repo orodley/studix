@@ -2,9 +2,9 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include "dev.h"
+#include <string.h>
+#include "../devices/dev.h"
 #include "idt.h"
-#include "lib/string.h"
 
 typedef struct IDT_entry
 {

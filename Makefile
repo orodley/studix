@@ -3,14 +3,13 @@ NAME    := $(NAME)-$(shell git describe)
 CC       = i586-elf-gcc
 LD       = $(CC)
 AS       = i586-elf-as
-CFLAGS   = -c -std=c99 -ffreestanding -Wall -Wextra -Werror \
+CFLAGS   = -c -std=c99 -ffreestanding -Isrc/lib -Wall -Wextra -Werror \
 		   -Wno-unused-parameter -DNAME=\"$(NAME)\"
 LDFLAGS  = -ffreestanding -nostdlib -lgcc
 EMU      = qemu-system-i386
-SRC_DIR  = src
-VPATH    = $(SRC_DIR)
-ASM_OBJS = $(patsubst %.s, %.o, $(shell find $(SRC_DIR) -name '*.s'))
-C_OBJS   = $(patsubst %.c, %.o, $(shell find $(SRC_DIR) -name '*.c'))
+VPATH    = src
+ASM_OBJS = $(patsubst %.s, %.o, $(shell find src -name '*.s'))
+C_OBJS   = $(patsubst %.c, %.o, $(shell find src -name '*.c'))
 OBJS     = $(C_OBJS) $(ASM_OBJS)
 
 .PHONY: all run clean bochs

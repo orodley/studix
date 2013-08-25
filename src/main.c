@@ -1,8 +1,8 @@
-#include "gdt.h"
-#include "idt.h"
-#include "term_printf.h"
-#include "timer.h"
-#include "vga.h"
+#include "cpu_setup/gdt.h"
+#include "cpu_setup/idt.h"
+#include "devices/timer.h"
+#include "term/term_printf.h"
+#include "term/vga.h"
 
 void notify(void (*func)(), char *str)
 {

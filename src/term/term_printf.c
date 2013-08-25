@@ -1,7 +1,7 @@
 // Print formatted output to the VGA terminal
 
-#include "vga.h"
 #include <stdarg.h>
+#include "vga.h"
 
 static void term_print_dec(int x)
 {

@@ -1,8 +1,8 @@
 // IRQ handler
 
-#include "dev.h"
-#include "isr.h"
+#include "../devices/dev.h"
 #include "idt.h"
+#include "interrupt.h"
 #include "irq.h"
 
 static Handler handlers[NUM_IDT_ENTRIES];
