@@ -1,10 +1,12 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+#include "../devices/dev.h"
 #include "vga.h"
 
 static const size_t VGA_WIDTH  = 80;
 static const size_t VGA_HEIGHT = 25;
+static const uint16_t CRTC_PORT = 0x3D4;
 
 static size_t          curr_y      = 0;
 static size_t          curr_x      = 0;
@@ -61,6 +63,16 @@ static void term_scroll()
 	curr_y = VGA_HEIGHT - 1;
 }
 
+static void update_cursor()
+{
+	uint16_t pos = curr_y * VGA_WIDTH + curr_x;
+
+	outb(CRTC_PORT,     0xF);        // About to send the 8 LSB through...
+	outb(CRTC_PORT + 1, pos & 0xFF); // ...there you go!
+	outb(CRTC_PORT,     0xE);        // Now for the 8 MSB...
+	outb(CRTC_PORT + 1, pos >> 8);   // ..done
+}
+
 void term_putchar(char c)
 {
 	switch (c) {
@@ -68,6 +80,9 @@ void term_putchar(char c)
 		curr_x = 0;
 		if (++curr_y == VGA_HEIGHT)
 			term_scroll();
+
+		update_cursor();
+
 		return;
 	case '\r':
 		curr_x = 0;
