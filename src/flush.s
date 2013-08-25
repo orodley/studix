@@ -14,3 +14,9 @@ flush_gdt:
 	ljmp	$8, $flush	# Load 8 (code segment offset) into cs
 flush:
 	ret
+
+.global flush_idt
+flush_idt:
+	movl	4(%esp), %eax	# Get the pointer to the IDT
+	lidt	(%eax)		# Load it up!
+	ret
