@@ -3,9 +3,9 @@
 # Common function called by all ISRs
 isr_common:
 	# Push all the registers we want to back up
-	pusha
+	pusha			# Push edi, esi, ebp, esp, ebx, edx, ecx, eax
 	mov	%ds, %ax
-	push	%eax
+	pushl	%eax
 
 	# Load kernel mode segments
 	mov	$0x10, %ax
@@ -17,7 +17,7 @@ isr_common:
 	call	isr_handler	# Call our C ISR handler
 
 	# Restore all the registers we backed up
-	pop	%eax
+	popl	%eax
 	mov	%ax, %ds
 	mov	%ax, %es
 	mov	%ax, %fs
@@ -31,9 +31,9 @@ isr_common:
 # Common function called by all IRQs
 irq_common:
 	# Push all the registers we want to back up
-	pusha
+	pusha			# Push edi, esi, ebp, esp, ebx, edx, ecx, eax
 	mov	%ds, %ax
-	push	%eax
+	pushl	%eax
 
 	# Load kernel mode segments
 	mov	$0x10, %ax
@@ -42,10 +42,10 @@ irq_common:
 	mov	%ax, %fs
 	mov	%ax, %gs
 
-	call	irq_handler	# Call our C ISR handler
+	call	irq_handler	# Call our C IRQ handler
 
 	# Restore all the registers we backed up
-	pop	%eax
+	popl	%eax
 	mov	%ax, %ds
 	mov	%ax, %es
 	mov	%ax, %fs
@@ -80,6 +80,7 @@ irq_common:
 	.global isr\num
 	isr\num:
 		cli
+		push	$0
 		push 	$\num
 		jmp 	irq_common
 .endm
