@@ -11,19 +11,21 @@ void notify(void (*func)(), char *str)
 	term_puts(" done");
 }
 
+void timer_notify(void (*func)(), char *str)
+{
+	term_printf("[%d] ", (int)uptime());
+	notify(func, str);
+}
+
 void kernel_main()
 {
 	init_term();
 	term_puts(NAME " booting...");
 
-	notify(init_gdt, "Initializing GDT...");
-	notify(init_idt, "Initializing IDT...");
-
-	term_putsn("Initializing PIT...");
-	init_timer(50);
-	term_puts(" done");
+	notify(init_gdt,   "Initializing GDT...");
+	notify(init_idt,   "Initializing IDT...");
+	notify(init_timer, "Initializing PIT...");
+	__asm__ volatile ("sti");	// Enable interrupts
 
 	term_printf("term_printf is %d%% p%cre %s\n", 100, 'u', "awesome");
-
-	__asm__ volatile ("int $2");
 }
