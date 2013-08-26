@@ -1,4 +1,4 @@
-// Programmable Interrupt Timer functions
+// Programmable Interval Timer functions
 
 #include <stdint.h>
 #include "../cpu_setup/interrupt.h"
