@@ -16,6 +16,29 @@ static void term_print_dec(int x)
 		term_putchar(((x / divisor) % 10) + '0');
 }
 
+static const int CASE_DIFF = 32;
+
+static void term_print_hex(int x, int upper)
+{
+	int shift = 4;
+	for (; ((x >> shift) & 0xF) != 0; shift += 4)
+		;
+
+	shift -= 4;
+
+	for (; shift >= 0; shift -= 4) {
+		uint8_t digit = (x >> shift) & 0xF;
+
+		char c;
+		if (digit < 0xA)
+			c = '0' + digit;
+		else
+			c = 'A' + (digit - 0xA) + (upper ? 0 : CASE_DIFF);
+
+		term_putchar(c);
+	}
+}
+
 void term_printf(const char *fmt, ...)
 {
 	va_list args;
@@ -32,6 +55,12 @@ void term_printf(const char *fmt, ...)
 				break;
 			case 'd':
 				term_print_dec(va_arg(args, int));
+				break;
+			case 'x':
+				term_print_hex(va_arg(args, unsigned int), 0);
+				break;
+			case 'X':
+				term_print_hex(va_arg(args, unsigned int), 1);
 				break;
 			case 's':
 				term_putsn(va_arg(args, char*));
