@@ -12,7 +12,7 @@ static const uint8_t TIMER_CMD      = 0x43;
 
 static uint32_t tick = 0;
 
-static void timer_callback(Registers regs)
+static void timer_handler(Registers regs)
 {
 	tick++;
 	term_printf("Tick: %d\n", tick);
@@ -20,7 +20,7 @@ static void timer_callback(Registers regs)
 
 void init_timer(uint32_t frequency)
 {
-	register_irq_handler(IRQ0, timer_callback);
+	register_irq_handler(IRQ0, timer_handler);
 
 	// Divisor must be small enough to fit into 16 bits!
 	uint16_t divisor = BASE_FREQUENCY / frequency;
