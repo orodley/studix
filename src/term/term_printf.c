@@ -18,7 +18,7 @@ static void term_print_dec(int x)
 
 static const int CASE_DIFF = 32;
 
-static void term_print_hex(int x, int upper)
+static void term_print_hex(unsigned int x, int upper)
 {
 	int shift = 4;
 	for (; ((x >> shift) & 0xF) != 0; shift += 4)
@@ -61,6 +61,10 @@ void term_printf(const char *fmt, ...)
 				break;
 			case 'X':
 				term_print_hex(va_arg(args, unsigned int), 1);
+				break;
+			case 'p':
+				term_putsn("0x");
+				term_print_hex((unsigned int)va_arg(args, void*), 0);
 				break;
 			case 's':
 				term_putsn(va_arg(args, char*));
