@@ -3,8 +3,8 @@ NAME    := $(NAME)-$(shell git describe)
 CC       = i586-elf-gcc
 LD       = $(CC)
 AS       = i586-elf-as
-CFLAGS   = -c -std=c99 -ffreestanding -Isrc/lib -Wall -Wextra -Werror \
-		   -Wno-unused-parameter -DNAME=\"$(NAME)\"
+CFLAGS   = -c -std=c99 -ffreestanding -Isrc/lib -Isrc/include -Wall -Wextra \
+           -Werror -Wno-unused-parameter -DNAME=\"$(NAME)\"
 LDFLAGS  = -ffreestanding -nostdlib -lgcc
 EMU      = qemu-system-i386
 VPATH    = src

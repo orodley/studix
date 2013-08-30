@@ -1,7 +1,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-#include "../devices/dev.h"
+#include "dev.h"
 #include "vga.h"
 
 static const size_t VGA_WIDTH  = 80;

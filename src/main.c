@@ -1,9 +1,9 @@
-#include "cpu_setup/gdt.h"
-#include "cpu_setup/idt.h"
-#include "devices/timer.h"
-#include "devices/ps2.h"
-#include "term/term_printf.h"
-#include "term/vga.h"
+#include "gdt.h"
+#include "idt.h"
+#include "timer.h"
+#include "ps2.h"
+#include "term_printf.h"
+#include "vga.h"
 
 void notify(void (*func)(), char *str)
 {

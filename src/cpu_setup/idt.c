@@ -3,7 +3,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-#include "../devices/dev.h"
+#include "dev.h"
 #include "idt.h"
 
 typedef struct IDT_entry

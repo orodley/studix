@@ -1,9 +1,9 @@
 // Programmable Interval Timer functions
 
 #include <stdint.h>
-#include "../cpu_setup/interrupt.h"
-#include "../cpu_setup/irq.h"
-#include "../term/term_printf.h"
+#include "interrupt.h"
+#include "irq.h"
+#include "term_printf.h"
 #include "dev.h"
 
 static const uint8_t TIMER_CHAN0      = 0x40;
