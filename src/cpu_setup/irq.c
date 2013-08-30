@@ -1,6 +1,7 @@
 // IRQ handler
 
 #include "../devices/dev.h"
+#include "../term/vga.h"
 #include "idt.h"
 #include "interrupt.h"
 #include "irq.h"
@@ -18,9 +19,8 @@ void irq_handler(Registers regs)
 	outb(0x20, 0x20);
 
 	Handler sel_handler = handlers[regs.int_no];
-	if (sel_handler) {
+	if (sel_handler)
 		sel_handler(regs);
-	}
 }
 
 void register_irq_handler(uint8_t i, Handler handler)

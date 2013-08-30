@@ -1,6 +1,7 @@
 #include "cpu_setup/gdt.h"
 #include "cpu_setup/idt.h"
 #include "devices/timer.h"
+#include "devices/ps2.h"
 #include "term/term_printf.h"
 #include "term/vga.h"
 
@@ -25,6 +26,8 @@ void kernel_main()
 	notify(init_gdt,   "Initializing GDT...");
 	notify(init_idt,   "Initializing IDT...");
 	notify(init_timer, "Initializing PIT...");
+	// Now we can use timer_notify()!
+	timer_notify(init_ps2,   "Initializing PS/2 controller...");
 	__asm__ volatile ("sti");	// Enable interrupts
 
 	term_printf("term_printf is %d%% p%cre %s\n", 100, 'u', "awesome");
