@@ -63,7 +63,7 @@ static void term_scroll()
 	curr_y = VGA_HEIGHT - 1;
 }
 
-static void update_cursor()
+void update_cursor()
 {
 	uint16_t pos = curr_y * VGA_WIDTH + curr_x;
 

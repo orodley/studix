@@ -76,8 +76,10 @@ static void ps2_handler(Registers regs)
 	if (shift_down)
 		c = capitalize(c);
 
-	if (pressedp(s))
+	if (pressedp(s)) {
 		term_putchar(c);
+		update_cursor();
+	}
 }
 
 void init_ps2()

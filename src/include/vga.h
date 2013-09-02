@@ -22,6 +22,7 @@ enum VGAColor
 	WHITE         = 15,
 };
 
+void update_cursor();
 void term_putchar(char c);
 void term_puts(const char *data);
 void term_putsn(const char *data);
