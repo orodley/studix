@@ -23,7 +23,7 @@ typedef struct GDT_ptr
 	uint32_t base;  // Address of the first GDT_entry
 } __attribute__((packed)) GDT_ptr;
 
-extern void flush_gdt(uint32_t);
+extern void flush_gdt(uint32_t gdt);
 
 #define NUM_GDT_ENTRIES 5
 
@@ -48,7 +48,7 @@ static void set_gdt_entry(size_t i, uint32_t base, uint32_t limit,
 void init_gdt()
 {
 	gdt.limit = (sizeof(GDT_entry) * NUM_GDT_ENTRIES) - 1;
-	gdt.base  = (uint32_t)&gdt_entries;
+	gdt.base  = (uintptr_t)&gdt_entries;
 
 	set_gdt_entry(0, 0, 0,          0,    0);    // Null segment
 	set_gdt_entry(1, 0, 0xFFFFFFFF, 0x9A, 0xCF); // Code segment
@@ -56,5 +56,5 @@ void init_gdt()
 	set_gdt_entry(3, 0, 0xFFFFFFFF, 0xFA, 0xCF); // User mode code segment
 	set_gdt_entry(4, 0, 0xFFFFFFFF, 0xF2, 0xCF); // User mode data segment
 
-	flush_gdt((uint32_t)&gdt);
+	flush_gdt((uintptr_t)&gdt);
 }

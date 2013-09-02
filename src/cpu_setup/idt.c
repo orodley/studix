@@ -32,7 +32,7 @@ EXISR(28); EXISR(29); EXISR(30); EXISR(31); EXISR(32); EXISR(33); EXISR(34);
 EXISR(35); EXISR(36); EXISR(37); EXISR(38); EXISR(39); EXISR(40); EXISR(41);
 EXISR(42); EXISR(43); EXISR(44); EXISR(45); EXISR(46); EXISR(47);
 
-extern void flush_idt(uint32_t);
+extern void flush_idt(uintptr_t idt);
 
 IDT_entry idt_entries[NUM_IDT_ENTRIES];
 IDT_ptr   idt;
@@ -50,7 +50,7 @@ static void set_idt_entry(uint8_t i, uint32_t base, uint16_t selector,
 }
 
 // Default IDT entry setter
-#define SET_IDT(n) set_idt_entry(n, (uint32_t)isr##n, 0x08, 0x8E)
+#define SET_IDT(n) set_idt_entry(n, (uintptr_t)isr##n, 0x08, 0x8E)
 
 // Remap the IRQ table
 void remap_irq()
@@ -72,7 +72,7 @@ void init_idt()
 	remap_irq();
 
 	idt.limit = (sizeof(IDT_entry) * NUM_IDT_ENTRIES) - 1;
-	idt.base  = (uint32_t)&idt_entries;
+	idt.base  = (uintptr_t)&idt_entries;
 
 	memset(&idt_entries, 0, sizeof(IDT_entry) * NUM_IDT_ENTRIES);
 
@@ -88,5 +88,5 @@ void init_idt()
 	SET_IDT(40); SET_IDT(41); SET_IDT(42); SET_IDT(43); SET_IDT(44);
 	SET_IDT(45); SET_IDT(46); SET_IDT(47);
 
-	flush_idt((uint32_t)&idt);
+	flush_idt((uintptr_t)&idt);
 }
