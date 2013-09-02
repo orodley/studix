@@ -10,12 +10,12 @@ static const uint16_t PS2_DATA = 0x60;
 static const uint16_t PS2_CMD  = 0x64;
 static const uint16_t PS2_STAT = 0x64;
 
-#define LSHIFT_DOWN 0x2A
-#define LSHIFT_UP   0xAA
-#define RSHIFT_DOWN 0x36
-#define RSHIFT_UP   0xB6
-#define ENTER_DOWN  0x1C
-#define ENTER_UP    0x9C
+#define LSHIFT_DOWN    0x2A
+#define LSHIFT_UP      0xAA
+#define RSHIFT_DOWN    0x36
+#define RSHIFT_UP      0xB6
+#define ENTER_DOWN     0x1C
+#define BACKSPACE_DOWN 0x0E
 
 static const size_t CASE_DIFF = 32;
 
@@ -68,6 +68,10 @@ static void ps2_handler(Registers regs)
 		return;
 	case ENTER_DOWN:
 		term_putchar('\n');
+		return;
+	case BACKSPACE_DOWN:
+		term_putsn("\b \b");
+		update_cursor();
 		return;
 	}
 
