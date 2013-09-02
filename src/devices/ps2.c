@@ -3,8 +3,7 @@
 #include <stddef.h>
 #include "interrupt.h"
 #include "irq.h"
-#include "term_printf.h"
-#include "vga.h"
+#include "term.h"
 #include "dev.h"
 
 static const uint16_t PS2_DATA = 0x60;

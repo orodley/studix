@@ -1,7 +1,6 @@
 // IRQ handler
 
 #include "dev.h"
-#include "vga.h"
 #include "idt.h"
 #include "interrupt.h"
 #include "irq.h"

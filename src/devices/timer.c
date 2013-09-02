@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include "interrupt.h"
 #include "irq.h"
-#include "term_printf.h"
+#include "term.h"
 #include "dev.h"
 
 static const uint8_t TIMER_CHAN0      = 0x40;

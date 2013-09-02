@@ -2,8 +2,7 @@
 #include "idt.h"
 #include "timer.h"
 #include "ps2.h"
-#include "term_printf.h"
-#include "vga.h"
+#include "term.h"
 
 void notify(void (*func)(), char *str)
 {

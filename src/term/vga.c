@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "dev.h"
-#include "vga.h"
+#include "term.h"
 
 static const size_t VGA_WIDTH  = 80;
 static const size_t VGA_HEIGHT = 25;

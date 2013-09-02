@@ -1,7 +1,7 @@
 // ISR handler
 
 #include <stdint.h>
-#include "term_printf.h"
+#include "term.h"
 #include "interrupt.h"
 
 static const char *interrupt_names[] =
