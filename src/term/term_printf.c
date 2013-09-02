@@ -16,7 +16,7 @@ static void term_print_dec(int x)
 		term_putchar(((x / divisor) % 10) + '0');
 }
 
-static const int CASE_DIFF = 32;
+static const size_t CASE_DIFF = 32;
 
 static void term_print_hex(unsigned int x, int upper)
 {
