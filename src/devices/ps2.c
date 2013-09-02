@@ -1,5 +1,6 @@
 // PS/2 controller driver
 
+#include <stdbool.h>
 #include <stddef.h>
 #include "interrupt.h"
 #include "irq.h"
@@ -19,7 +20,7 @@ static const uint16_t PS2_STAT = 0x64;
 
 static const size_t CASE_DIFF = 32;
 
-static int shift_down = 0;
+static bool shift_down = false;
 
 int pressedp(uint8_t scancode)
 {
@@ -60,11 +61,11 @@ static void ps2_handler(Registers regs)
 	switch (s) {
 	case LSHIFT_DOWN:
 	case RSHIFT_DOWN:
-		shift_down = 1;
+		shift_down = true;
 		return;
 	case LSHIFT_UP:
 	case RSHIFT_UP:
-		shift_down = 0;
+		shift_down = false;
 		return;
 	case ENTER_DOWN:
 		term_putchar('\n');
