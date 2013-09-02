@@ -11,10 +11,12 @@ static const uint16_t PS2_DATA = 0x60;
 static const uint16_t PS2_CMD  = 0x64;
 static const uint16_t PS2_STAT = 0x64;
 
-static const uint16_t LSHIFT_DOWN = 0x2A;
-static const uint16_t LSHIFT_UP   = 0xAA;
-static const uint16_t RSHIFT_DOWN = 0x36;
-static const uint16_t RSHIFT_UP   = 0xB6;
+#define LSHIFT_DOWN 0x2A
+#define LSHIFT_UP   0xAA
+#define RSHIFT_DOWN 0x36
+#define RSHIFT_UP   0xB6
+#define ENTER_DOWN  0x1C
+#define ENTER_UP    0x9C
 
 static const size_t CASE_DIFF = 32;
 
@@ -56,12 +58,17 @@ static void ps2_handler(Registers regs)
 {
 	uint8_t s = inb(PS2_DATA); // Read entered scancode
 
-	if (s == LSHIFT_DOWN || s == RSHIFT_DOWN) {
+	switch (s) {
+	case LSHIFT_DOWN:
+	case RSHIFT_DOWN:
 		shift_down = 1;
 		return;
-	}
-	if (s == LSHIFT_UP   || s == RSHIFT_UP) {
+	case LSHIFT_UP:
+	case RSHIFT_UP:
 		shift_down = 0;
+		return;
+	case ENTER_DOWN:
+		term_putchar('\n');
 		return;
 	}
 
