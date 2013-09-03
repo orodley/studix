@@ -32,5 +32,8 @@ void kernel_main()
 	timer_notify(init_paging, "Initializing page table...");
 	__asm__ volatile ("sti");	// Enable interrupts
 
+	// Page fault, just for kicks
+	term_printf("%d", *(int*)0xA0000000);
+
 	term_printf("term_printf is %d%% p%cre %s\n", 100, 'u', "awesome");
 }

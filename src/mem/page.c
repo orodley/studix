@@ -5,6 +5,7 @@
 #include <string.h>
 #include "interrupt.h"
 #include "kmalloc.h"
+#include "panic.h"
 
 typedef struct Page_entry
 {
@@ -84,8 +85,6 @@ static uint32_t first_frame()
 	return i;
 }
 
-#define PANIC(x) ((void)0)
-
 // Allocate a new frame
 void alloc_frame(Page_entry *page, bool kernel, bool writeable)
 {
@@ -154,7 +153,7 @@ void switch_page_dir(Page_dir *dir)
 
 void page_fault_handler(Registers regs)
 {
-
+	PANIC("Page fault!");
 }
 
 void init_paging()
