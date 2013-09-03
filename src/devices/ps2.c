@@ -3,7 +3,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include "interrupt.h"
-#include "irq.h"
 #include "term.h"
 #include "dev.h"
 
@@ -88,5 +87,5 @@ static void ps2_handler(Registers regs)
 
 void init_ps2()
 {
-	register_irq_handler(IRQ1, ps2_handler);
+	register_interrupt_handler(IRQ1, ps2_handler);
 }

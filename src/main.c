@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include "gdt.h"
 #include "idt.h"
 #include "term.h"

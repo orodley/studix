@@ -2,7 +2,6 @@
 
 #include <stdint.h>
 #include "interrupt.h"
-#include "irq.h"
 #include "term.h"
 #include "dev.h"
 
@@ -26,7 +25,7 @@ long uptime()
 
 void init_timer()
 {
-	register_irq_handler(IRQ0, timer_handler);
+	register_interrupt_handler(IRQ0, timer_handler);
 
 	// Divisor must be small enough to fit into 16 bits!
 	uint16_t divisor = BASE_FREQUENCY / MILLISECOND_FREQ;

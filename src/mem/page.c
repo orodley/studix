@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include <string.h>
 #include "interrupt.h"
-#include "irq.h"
 #include "kmalloc.h"
 
 typedef struct Page_entry
@@ -175,7 +174,7 @@ void init_paging()
 	for (size_t i = 0; i < placement_addr; i += PAGE_SIZE)
 		alloc_frame(get_page(i, true, kernel_dir), false, false);
 
-	register_irq_handler(14, page_fault_handler);
+	register_interrupt_handler(14, page_fault_handler);
 
 	switch_page_dir(kernel_dir);
 }
