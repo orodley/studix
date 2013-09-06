@@ -61,6 +61,25 @@ static int8_t header_comparer(void *a, void *b)
 	return ((Header*)a)->size < ((Header*)b)->size ? 1 : 0;
 }
 
+Header *make_header(uintptr_t loc, size_t size, bool is_hole)
+{
+	Header *header  = (Header*)loc;
+	header->size    = size;
+	header->magic   = HEAP_MAGIC;
+	header->is_hole = is_hole;
+
+	return header;
+}
+
+Footer *make_footer(uintptr_t loc, Header *assoc_header)
+{
+	Footer *footer = (Footer*)loc;
+	footer->header = assoc_header;
+	footer->magic  = HEAP_MAGIC;
+
+	return footer;
+}
+
 Heap *create_heap(uintptr_t start, uintptr_t end, uintptr_t max,
 		bool supervisor, bool readonly)
 {
@@ -86,10 +105,7 @@ Heap *create_heap(uintptr_t start, uintptr_t end, uintptr_t max,
 	heap->readonly   = readonly;
 
 	// At the start, the whole thing is a hole
-	Header *hole  = (Header*)start;
-	hole->size    = end - start;
-	hole->magic   = HEAP_MAGIC;
-	hole->is_hole = true;
+	Header *hole = make_header(start, end - start, true);
 	insert_ordered_array((void*)hole, &heap->index);
 
 	return heap;
@@ -167,22 +183,16 @@ void *alloc(size_t size, bool align, Heap *heap)
 
 		if (header_index != -1) {
 			// The last header needs adjusting
-			Header *header  = lookup_ordered_array(header_index, &heap->index);
-			header->size   += new_length - old_length;
+			Header *header = lookup_ordered_array(header_index, &heap->index);
+			header->size  += new_length - old_length;
 
-			Footer *footer  = (Footer*)(header + header->size - sizeof(Footer));
-			footer->header  = header;
-			footer->magic   = HEAP_MAGIC;
+			make_footer((uintptr_t)header + header->size - sizeof(Footer),
+				header);
 		} else {
-			Header *header  = (Header*)old_end_addr;
-			header->magic   = HEAP_MAGIC;
-			header->size    = new_length - old_length;
-			header->is_hole = true;
+			Header *header =
+				make_header(old_end_addr, new_length - old_length, true);
 
-			Footer *footer  = (Footer*)(old_end_addr + header->size
-					- sizeof(Footer));
-			footer->magic   = HEAP_MAGIC;
-			footer->header  = header;
+			make_footer(old_end_addr + header->size - sizeof(Footer), header);
 			insert_ordered_array((void*)header, &heap->index);
 		}
 
@@ -205,19 +215,15 @@ void *alloc(size_t size, bool align, Heap *heap)
 	// If we need to page-align it, then do it, and create a new hole in
 	// the gap
 	if (align && ((orig_hole_pos + sizeof(Header)) & 0xFFFFF000) != 0) {
-		uintptr_t new_hole_loc     = orig_hole_pos + PAGE_SIZE -
+		uintptr_t new_hole_loc  = orig_hole_pos + PAGE_SIZE -
 			(orig_hole_pos & 0xFFF) - sizeof(Header);
-		Header   *new_hole_header  = (Header*)orig_hole_pos;
-		new_hole_header->size      = new_hole_loc - orig_hole_pos;
-		new_hole_header->magic     = HEAP_MAGIC;
-		new_hole_header->is_hole   = true;
+		Header *new_hole_header =
+			make_header(orig_hole_pos, new_hole_loc - orig_hole_pos, true);
 
-		Footer *new_hole_footer    = (Footer*)(new_hole_loc - sizeof(Footer));
-		new_hole_footer->magic     = HEAP_MAGIC;
-		new_hole_footer->header    = new_hole_header;
+		make_footer(new_hole_loc - sizeof(Footer), new_hole_header);
 
-		orig_hole_pos              = new_hole_loc;
-		orig_hole_size            -= new_hole_header->size;
+		orig_hole_pos           = new_hole_loc;
+		orig_hole_size         -= new_hole_header->size;
 	} else {
 		// We only need to remove the hole from the index if we're using it
 		// as the location for our new block. In the branch above we create
@@ -226,31 +232,21 @@ void *alloc(size_t size, bool align, Heap *heap)
 	}
 
 	// Overwrite the old header
-	Header *block_header  = (Header*)orig_hole_pos;
-	// We need to make sure this is set, as block_header isn't necessarily
-	// already a header at all; it might be a new hole we placed above when
-	// page-aligning
-	block_header->magic   = HEAP_MAGIC;
-	block_header->is_hole = false;
-	block_header->size    = total_block_size;
+	Header *block_header = make_header(orig_hole_pos, total_block_size, false);
 
 	// Set up the new footer
 	// We're potentially creating a new footer here, if we ended up using less
 	// space than was in the original hole
-	Footer *block_footer  = (Footer*)(orig_hole_pos + total_block_size -
-			sizeof(Footer));
-	block_footer->magic   = HEAP_MAGIC;
-	block_footer->header  = block_header;
+	make_footer(orig_hole_pos + total_block_size - sizeof(Footer),
+		block_header);
 
 	// If necessary, split the block in two
 	if (orig_hole_size > total_block_size) {
 		// The new hole sits later in memory than the first half, as we've
 		// potentially need our new block to be page-aligned.
 		// So we now create a new header and footer for this new block
-		Header *new_hole_header  = (Header*)(orig_hole_pos + total_block_size);
-		new_hole_header->magic   = HEAP_MAGIC;
-		new_hole_header->is_hole = true;
-		new_hole_header->size    = orig_hole_size - total_block_size;
+		Header *new_hole_header = make_header(orig_hole_pos + total_block_size,
+				orig_hole_size - total_block_size, true);
 
 		Footer *new_hole_footer  = (Footer*)((uintptr_t)new_hole_header +
 			new_hole_header->size - sizeof(Footer));
@@ -331,11 +327,9 @@ void free(void *ptr, Heap *heap)
 				heap);
 		if (header->size > old_length - new_length) {
 			// We'll still exist, so resize us
-			header->size  -= old_length - new_length;
-			footer         = (Footer*)((uintptr_t)header +
-					header->size - sizeof(Footer));
-			footer->magic  = HEAP_MAGIC;
-			footer->header = header;
+			header->size -= old_length - new_length;
+			footer        = make_footer((uintptr_t)header + header->size -
+					sizeof(Footer), header);
 		} else {
 			// We're not going to be around anymore
 			size_t i;
