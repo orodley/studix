@@ -19,6 +19,6 @@ Ordered_array place_ordered_array(void *addr, size_t max_size,
 		Comparer comparer);
 
 void  delete_ordered_array(Ordered_array);
-void  insert_ordered_array(void *item, Ordered_array *array);
-void *lookup_ordered_array(size_t i, Ordered_array *array);
-void  remove_ordered_array(size_t i, Ordered_array *array);
+void  ordered_array_insert(Ordered_array *array, void *item);
+void *ordered_array_lookup(Ordered_array *array, size_t i);
+void  ordered_array_remove(Ordered_array *array, size_t i);

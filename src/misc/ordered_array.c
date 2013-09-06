@@ -40,7 +40,7 @@ Ordered_array place_ordered_array(void *addr, size_t max_size,
 	return result;
 }
 
-void insert_ordered_array(void *item, Ordered_array *array)
+void ordered_array_insert(Ordered_array *array, void *item)
 {
 	ASSERT(array->comparer);
 
@@ -66,13 +66,13 @@ void insert_ordered_array(void *item, Ordered_array *array)
 	}
 }
 
-void *lookup_ordered_array(size_t i, Ordered_array *array)
+void *ordered_array_lookup(Ordered_array *array, size_t i)
 {
 	ASSERT(i < array->size);
 	return array->array[i];
 }
 
-void remove_ordered_array(size_t i, Ordered_array *array)
+void ordered_array_remove(Ordered_array *array, size_t i)
 {
 	for (; i < array->size; i++)
 		array->array[i] = array->array[i + 1];

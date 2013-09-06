@@ -39,7 +39,7 @@ extern Page_dir *kernel_dir;
 static int32_t find_smallest_hole(size_t size, bool align, Heap *heap)
 {
 	for (size_t i = 0; i < heap->index.size; i++) {
-		Header *header = (Header*)lookup_ordered_array(i, &heap->index);
+		Header *header = (Header*)ordered_array_lookup(&heap->index, i);
 
 		if (align) {
 			uintptr_t loc    = (uintptr_t)header;
@@ -106,7 +106,7 @@ Heap *create_heap(uintptr_t start, uintptr_t end, uintptr_t max,
 
 	// At the start, the whole thing is a hole
 	Header *hole = make_header(start, end - start, true);
-	insert_ordered_array((void*)hole, &heap->index);
+	ordered_array_insert(&heap->index, (void*)hole);
 
 	return heap;
 }
@@ -173,7 +173,7 @@ void *alloc(size_t size, bool align, Heap *heap)
 		int32_t   header_index = -1;
 		uintptr_t value        =  0;
 		for (size_t i = 0; i < heap->index.size; i++) {
-			uintptr_t tmp = (uintptr_t)lookup_ordered_array(i, &heap->index);
+			uintptr_t tmp = (uintptr_t)ordered_array_lookup(&heap->index, i);
 
 			if (tmp > value) {
 				value = tmp;
@@ -183,7 +183,7 @@ void *alloc(size_t size, bool align, Heap *heap)
 
 		if (header_index != -1) {
 			// The last header needs adjusting
-			Header *header = lookup_ordered_array(header_index, &heap->index);
+			Header *header = ordered_array_lookup(&heap->index, header_index);
 			header->size  += new_length - old_length;
 
 			make_footer((uintptr_t)header + header->size - sizeof(Footer),
@@ -193,14 +193,14 @@ void *alloc(size_t size, bool align, Heap *heap)
 				make_header(old_end_addr, new_length - old_length, true);
 
 			make_footer(old_end_addr + header->size - sizeof(Footer), header);
-			insert_ordered_array((void*)header, &heap->index);
+			ordered_array_insert(&heap->index, (void*)header);
 		}
 
 		// Now we have enough space. Try again.
 		return alloc(size, align, heap);
 	}
 
-	Header *orig_hole_header = (Header*)lookup_ordered_array(i, &heap->index);
+	Header *orig_hole_header = (Header*)ordered_array_lookup(&heap->index, i);
 	uintptr_t orig_hole_pos  = (uintptr_t)orig_hole_header;
 	size_t    orig_hole_size = orig_hole_header->size;
 
@@ -228,7 +228,7 @@ void *alloc(size_t size, bool align, Heap *heap)
 		// We only need to remove the hole from the index if we're using it
 		// as the location for our new block. In the branch above we create
 		// a new, free, hole at the location we're removing here
-		remove_ordered_array(i, &heap->index);
+		ordered_array_remove(&heap->index, i);
 	}
 
 	// Overwrite the old header
@@ -256,7 +256,7 @@ void *alloc(size_t size, bool align, Heap *heap)
 			new_hole_footer->header = new_hole_header;
 		}
 
-		insert_ordered_array((void*)new_hole_header, &heap->index);
+		ordered_array_insert(&heap->index, (void*)new_hole_header);
 	}
 
 	// Phew!
@@ -311,13 +311,13 @@ void free(void *ptr, Heap *heap)
 		// Remove the header from the index
 		size_t i;
 		for (i = 0; i < heap->index.size; i++)
-			if (lookup_ordered_array(i, &heap->index) == potential_header)
+			if (ordered_array_lookup(&heap->index, i) == potential_header)
 				break;
 
 		// Make sure we actually found it
 		ASSERT(i < heap->index.size);
 
-		remove_ordered_array(i, &heap->index);
+		ordered_array_remove(&heap->index, i);
 	}
 
 	// We can contract the heap if this hole is at the end
@@ -334,14 +334,14 @@ void free(void *ptr, Heap *heap)
 			// We're not going to be around anymore
 			size_t i;
 			for (i = 0; i < heap->index.size; i++)
-				if (lookup_ordered_array(i, &heap->index) == header)
+				if (ordered_array_lookup(&heap->index, i) == header)
 					break;
 
 			if (i < heap->index.size)
-				remove_ordered_array(i, &heap->index);
+				ordered_array_remove(&heap->index, i);
 		}
 	}
 
 	if (add_header)
-		insert_ordered_array(header, &heap->index);
+		ordered_array_insert(&heap->index, header);
 }
