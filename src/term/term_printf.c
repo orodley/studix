@@ -20,7 +20,7 @@ static const size_t CASE_DIFF = 32;
 
 static void term_print_hex(unsigned int x, int upper)
 {
-	int shift = 28;
+	int shift = (sizeof(unsigned int) * 8) - 4;
 	for (; ((x >> shift) & 0xF) == 0 && shift > 0; shift -= 4)
 		;
 
