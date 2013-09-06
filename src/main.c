@@ -1,4 +1,6 @@
 #include <stdint.h>
+#include "kmalloc.h"
+#include "assert.h"
 #include "gdt.h"
 #include "idt.h"
 #include "term.h"
@@ -27,13 +29,22 @@ void kernel_main()
 	notify(init_gdt,   "Initializing GDT...");
 	notify(init_idt,   "Initializing IDT...");
 	notify(init_timer, "Initializing PIT...");
+
 	// Now we can use timer_notify()!
 	timer_notify(init_ps2,    "Initializing PS/2 controller...");
 	timer_notify(init_paging, "Initializing page table...");
+
 	__asm__ volatile ("sti");	// Enable interrupts
 
-	// Page fault, just for kicks
-	term_printf("%d", *(int*)0xA0000000);
-
 	term_printf("term_printf is %d%% p%cre %s\n", 100, 'u', "awesome");
+
+	// Allocate some memory, just for fun
+	uintptr_t a = kmalloc(8);
+	uintptr_t b = kmalloc(8);
+	term_printf("a: %p, b = %p", a, b);
+
+	kfree((void*)b);
+	kfree((void*)a);
+	uintptr_t c = kmalloc(12);
+	term_printf(", c: %p\n", c);
 }

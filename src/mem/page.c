@@ -3,40 +3,15 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include "alloc.h"
 #include "interrupt.h"
 #include "kmalloc.h"
+#include "page.h"
 #include "panic.h"
+#include "term.h"
 
-typedef struct Page_entry
-{
-	uint32_t present  : 1;  // Page present in memory?
-	uint32_t rw       : 1;  // Read-only (0) or read/write (1)?
-	uint32_t user     : 1;  // Kernel or user access level?
-	uint32_t accessed : 1;  // Has the page been accessed since last refresh?
-	uint32_t dirty    : 1;  // Has the page been written to since last refresh?
-	uint32_t unused   : 7;  // Reserved + unused available bits
-	uint32_t frame    : 20; // Physical frame address, right shifted by 12
-} Page_entry;
-
-typedef struct Page_table
-{
-	Page_entry pages[1024];
-} Page_table;
-
-typedef struct Page_dir
-{
-	// Array of page table pointers
-	Page_table *tables[1024];
-
-	// Physical addresses of tables above
-	uint32_t tables_physical[1024];
-
-	// Physical address of tables_physical;
-	uint32_t physical_addr;
-} Page_dir;
-
-Page_dir *kernel_dir = NULL;
 Page_dir *curr_dir   = NULL;
+Page_dir *kernel_dir = NULL;
 
 uint32_t *frames;
 uint32_t num_frames;
@@ -45,8 +20,6 @@ extern uintptr_t placement_addr;
 
 #define BIT_INDEX(a)  (a / (8 * 4))
 #define BIT_OFFSET(a) (a % (8 * 4))
-
-static const int PAGE_SIZE = 0x1000; // 4KiB
 
 static void set_frame(uint32_t frame_addr)
 {
@@ -153,13 +126,39 @@ void switch_page_dir(Page_dir *dir)
 
 void page_fault_handler(Registers regs)
 {
+    // The faulting address is stored in the CR2 register.
+    uintptr_t fault_addr;
+    __asm__ volatile("mov %%cr2, %0" : "=r" (fault_addr));
+	uint8_t   err = regs.err;
+
+    // The error code gives us details of what happened.
+    bool present   = !(err & 0x01); // Page not present
+    bool read      =   err & 0x02;  // Write operation?
+    bool user      =   err & 0x04;  // Processor was in user-mode?
+    bool overwrite =   err & 0x08;  // Overwritten CPU-reserved bits?
+    bool fetch     =   err & 0x10;  // Caused by an instruction fetch?
+
+    // Output an error message.
+    term_printf("Page fault at %p\n", fault_addr);
+	term_printf(" %s\n caused by a %s access in %s mode\n",
+		present ? "protection fault"     : "page was not found",
+		read    ? "read"                 : "write",
+		user    ? "user"                 : "kernel");
+	term_printf(" reserved bits were %soverwritten\n",
+		overwrite ? "" : "not ");
+	term_printf(" %s caused by instruction fetch\n",
+		fetch ? "was" : "not");
+
+	__asm__ volatile ("xchg %bx, %bx"); // Magic breakpoint!
 	PANIC("Page fault!");
 }
 
+Heap *kheap = NULL;
+
 void init_paging()
 {
-	// Assume physical memory is 16MB, for now
-	uint32_t phys_mem_size = 0x1000000;
+	// Assume physical memory is 64MB, for now
+	uint32_t phys_mem_size = 0x4000000;
 
 	num_frames = phys_mem_size / PAGE_SIZE;
 	frames     = (uint32_t*)kmalloc(BIT_INDEX(num_frames));
@@ -170,10 +169,24 @@ void init_paging()
 	memset(kernel_dir, 0, sizeof(Page_dir));
 	curr_dir   = kernel_dir;
 
-	for (size_t i = 0; i < placement_addr; i += PAGE_SIZE)
+	// Map some kernel heap pages
+	for (size_t i = HEAP_START; i < HEAP_START + HEAP_INIT_SIZE;
+			i += PAGE_SIZE)
+		get_page(i, true, kernel_dir);
+
+	// Allocate an extra page for the kernel heap
+	for (size_t i = 0; i < placement_addr + PAGE_SIZE; i += PAGE_SIZE)
+		alloc_frame(get_page(i, true, kernel_dir), false, false);
+
+	// Allocate those pages from earlier
+	for (size_t i = HEAP_START; i <HEAP_START + HEAP_INIT_SIZE;
+			i += PAGE_SIZE)
 		alloc_frame(get_page(i, true, kernel_dir), false, false);
 
 	register_interrupt_handler(14, page_fault_handler);
 
 	switch_page_dir(kernel_dir);
+
+	kheap = create_heap(HEAP_START, HEAP_START + HEAP_INIT_SIZE,
+			HEAP_START + HEAP_MAX_SIZE, false, false);
 }
