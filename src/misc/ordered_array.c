@@ -13,23 +13,15 @@ int8_t std_comparer(void *a, void *b)
 
 Ordered_array create_ordered_array(size_t max_size, Comparer comparer)
 {
-	Ordered_array result;
-
 	size_t size = max_size * sizeof(void*);
-	result.array = (void*)kmalloc(size);
-	memset(result.array, 0, size);
-
-	result.size     = 0;
-	result.max_size = max_size;
-	result.comparer = comparer;
-
-	return result;
+	return place_ordered_array((void*)kmalloc(size), max_size, comparer);
 }
 
 Ordered_array place_ordered_array(void *addr, size_t max_size,
 		Comparer comparer)
 {
 	Ordered_array result;
+
 	result.array = addr;
 	memset(addr, 0, max_size * (sizeof(void*)));
 
