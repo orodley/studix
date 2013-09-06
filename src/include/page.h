@@ -6,13 +6,13 @@
 
 typedef struct Page_entry
 {
-	uint32_t present  : 1;  // Page present in memory?
-	uint32_t rw       : 1;  // Read-only (0) or read/write (1)?
-	uint32_t user     : 1;  // Kernel or user access level?
-	uint32_t accessed : 1;  // Has the page been accessed since last refresh?
-	uint32_t dirty    : 1;  // Has the page been written to since last refresh?
-	uint32_t unused   : 7;  // Reserved + unused available bits
-	uint32_t frame    : 20; // Physical frame address, right shifted by 12
+	unsigned int present  : 1;  // Page present in memory?
+	unsigned int rw       : 1;  // Read-only (0) or read/write (1)?
+	unsigned int user     : 1;  // Kernel or user access level?
+	unsigned int accessed : 1;  // Has it been accessed since last refresh?
+	unsigned int dirty    : 1;  // Has it been written to since last refresh?
+	unsigned int unused   : 7;  // Reserved + unused available bits
+	unsigned int frame    : 20; // Physical frame address, right shifted by 12
 } Page_entry;
 
 typedef struct Page_table
