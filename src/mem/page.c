@@ -126,20 +126,20 @@ void switch_page_dir(Page_dir *dir)
 
 void page_fault_handler(Registers regs)
 {
-    // The faulting address is stored in the CR2 register.
-    uintptr_t fault_addr;
-    __asm__ volatile("mov %%cr2, %0" : "=r" (fault_addr));
+	// The faulting address is stored in the CR2 register.
+	uintptr_t fault_addr;
+	__asm__ volatile("mov %%cr2, %0" : "=r" (fault_addr));
 	uint8_t   err = regs.err;
 
-    // The error code gives us details of what happened.
-    bool present   = !(err & 0x01); // Page not present
-    bool read      =   err & 0x02;  // Write operation?
-    bool user      =   err & 0x04;  // Processor was in user-mode?
-    bool overwrite =   err & 0x08;  // Overwritten CPU-reserved bits?
-    bool fetch     =   err & 0x10;  // Caused by an instruction fetch?
+	// The error code gives us details of what happened.
+	bool present   = !(err & 0x01); // Page not present
+	bool read      =   err & 0x02;  // Write operation?
+	bool user      =   err & 0x04;  // Processor was in user-mode?
+	bool overwrite =   err & 0x08;  // Overwritten CPU-reserved bits?
+	bool fetch     =   err & 0x10;  // Caused by an instruction fetch?
 
-    // Output an error message.
-    term_printf("Page fault at %p\n", fault_addr);
+	// Output an error message.
+	term_printf("Page fault at %p\n", fault_addr);
 	term_printf(" %s\n caused by a %s access in %s mode\n",
 		present ? "protection fault"     : "page was not found",
 		read    ? "read"                 : "write",

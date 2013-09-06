@@ -86,8 +86,8 @@ Heap *create_heap(uintptr_t start, uintptr_t end, uintptr_t max,
 	Heap *heap  = (Heap*)kmalloc(sizeof(Heap));
 
 	// Make sure start and end are page-aligned
-    ASSERT(start % 0x1000 == 0);
-    ASSERT(end   % 0x1000 == 0);
+	ASSERT(start % 0x1000 == 0);
+	ASSERT(end   % 0x1000 == 0);
 
 	heap->index = place_ordered_array((void*)start, HEAP_INDEX_SIZE,
 			header_comparer);
@@ -114,7 +114,7 @@ Heap *create_heap(uintptr_t start, uintptr_t end, uintptr_t max,
 static void expand(size_t new_size, Heap *heap)
 {
 	// Sanity check
-    ASSERT(heap->start_addr + new_size > heap->end_addr);
+	ASSERT(heap->start_addr + new_size > heap->end_addr);
 
 	if ((new_size & 0xFFFFF000) != 0) {
 		new_size &= 0xFFFFF000;
@@ -122,7 +122,7 @@ static void expand(size_t new_size, Heap *heap)
 	}
 
 	// We don't want to expand over the max address
-    ASSERT(heap->start_addr + new_size <= heap->max_addr);
+	ASSERT(heap->start_addr + new_size <= heap->max_addr);
 
 	size_t old_size = heap->end_addr - heap->start_addr;
 
@@ -135,8 +135,8 @@ static void expand(size_t new_size, Heap *heap)
 
 static size_t contract(size_t new_size, Heap *heap)
 {
-    // Sanity check.
-    ASSERT(heap->start_addr + new_size < heap->end_addr);
+	// Sanity check.
+	ASSERT(heap->start_addr + new_size < heap->end_addr);
 
 	if ((new_size & PAGE_SIZE) != 0) {
 		new_size &= PAGE_SIZE;
