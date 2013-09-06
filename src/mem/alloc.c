@@ -290,7 +290,7 @@ void free(void *ptr, Heap *heap)
 
 	// Unify left
 	// Check if we're immediately next to another hole on the left
-	Footer *potential_footer = (Footer*)(header - sizeof(Footer));
+	Footer *potential_footer = (Footer*)((uintptr_t)header - sizeof(Footer));
 	if (potential_footer->magic == HEAP_MAGIC &&
 			potential_footer->header->is_hole) {
 		// Merge the two holes
@@ -304,13 +304,13 @@ void free(void *ptr, Heap *heap)
 
 	// Unify right
 	// Check if we're immediately next to another hole on the right
-	Header *potential_header = (Header*)(footer + sizeof(Footer));
+	Header *potential_header = (Header*)((uintptr_t)footer + sizeof(Footer));
 	if (potential_header->magic == HEAP_MAGIC &&
 			potential_header->is_hole) {
 		// Merge the two holes
 		header->size += potential_header->size;
-		footer = (Footer*)
-			(potential_header + potential_header->size - sizeof(Footer));
+		footer = (Footer*)((uintptr_t)potential_header +
+			potential_header->size - sizeof(Footer));
 
 		// Remove the header from the index
 		size_t i;
@@ -325,14 +325,15 @@ void free(void *ptr, Heap *heap)
 	}
 
 	// We can contract the heap if this hole is at the end
-	if ((uintptr_t)(footer + sizeof(Footer)) == heap->end_addr) {
+	if ((uintptr_t)footer + sizeof(Footer) == heap->end_addr) {
 		size_t old_length = heap->end_addr - heap->start_addr;
-		size_t new_length = contract((size_t)(header - heap->start_addr),
+		size_t new_length = contract(((uintptr_t)header - heap->start_addr),
 				heap);
 		if (header->size > old_length - new_length) {
 			// We'll still exist, so resize us
 			header->size  -= old_length - new_length;
-			footer         = (Footer*)(header + header->size - sizeof(Footer));
+			footer         = (Footer*)((uintptr_t)header +
+					header->size - sizeof(Footer));
 			footer->magic  = HEAP_MAGIC;
 			footer->header = header;
 		} else {
