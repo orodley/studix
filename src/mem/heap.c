@@ -22,7 +22,7 @@ void print_block(Header *header, Footer *footer)
 		footer->header, (uintptr_t)footer + sizeof(Footer));
 }
 
-int32_t find_smallest_hole(size_t size, bool align, Heap *heap)
+int32_t find_smallest_hole(Heap *heap, size_t size, bool align)
 {
 	for (size_t i = 0; i < heap->index.size; i++) {
 		Header *header = (Header*)ordered_array_lookup(&heap->index, i);

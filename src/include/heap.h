@@ -30,7 +30,7 @@ typedef struct Heap
 
 Heap   *create_heap(uintptr_t start, uintptr_t end, uintptr_t max,
 	bool supervisor, bool readonly);
-int32_t find_smallest_hole(size_t size, bool align, Heap *heap);
+int32_t find_smallest_hole(Heap *heap, size_t size, bool align);
 
 void   expand(  Heap *heap, size_t new_size);
 size_t contract(Heap *heap, size_t new_size);

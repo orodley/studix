@@ -19,7 +19,7 @@ static uintptr_t kmalloc_aux(size_t size, bool align,
 		uint32_t *phys)
 {
 	if (kheap != NULL) {
-		void *addr = alloc(size, align, kheap);
+		void *addr = alloc(kheap, size, align);
 
 		if (phys) {
 			Page_entry *page = get_page((uintptr_t)addr, false, kernel_dir);
@@ -66,5 +66,5 @@ uintptr_t kmalloc_ap(size_t size, uint32_t *phys)
 
 void kfree(void *ptr)
 {
-	free(ptr, kheap);
+	free(kheap, ptr);
 }

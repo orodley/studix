@@ -46,17 +46,17 @@ static void make_space(Heap *heap, size_t needed_size)
 	}
 }
 
-void *alloc(size_t size, bool align, Heap *heap)
+void *alloc(Heap *heap, size_t size, bool align)
 {
 	// Account for header/footer
 	size_t total_block_size = size + sizeof(Header) + sizeof(Footer);
-	int32_t i = find_smallest_hole(total_block_size, align, heap);
+	int32_t i = find_smallest_hole(heap, total_block_size, align);
 
 	if (i == -1) { // Uh oh, there's no hole big enough!
 		make_space(heap, total_block_size);
 
 		// Now we have enough space. Try again.
-		return alloc(size, align, heap);
+		return alloc(heap, size, align);
 	}
 
 	Header *orig_hole_header = (Header*)ordered_array_lookup(&heap->index, i);
@@ -160,7 +160,7 @@ Footer *unify_right(Header *header, Footer *footer, Heap *heap)
 	return footer;
 }
 
-void free(void *ptr, Heap *heap)
+void free(Heap *heap, void *ptr)
 {
 	if (ptr == NULL)
 		return;
