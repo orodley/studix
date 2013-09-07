@@ -12,6 +12,10 @@ ASM_OBJS = $(patsubst %.s, %.o, $(shell find src -name '*.s'))
 C_OBJS   = $(patsubst %.c, %.o, $(shell find src -name '*.c'))
 OBJS     = $(C_OBJS) $(ASM_OBJS)
 
+# C compiler used for compiling tools that run on the host during build
+HOST_CC     = gcc
+HOST_CFLAGS = -std=c99 -Isrc/include -Wall -Wextra -pedantic -Werror
+
 .PHONY: all run clean bochs
 
 all: $(NAME).iso
@@ -21,6 +25,9 @@ run: $(NAME).iso
 
 bochs: $(NAME).iso
 	bochs
+
+tools/make_initrd: tools/make_initrd.c
+	$(HOST_CC) -o $@ $(HOST_CFLAGS) $<
 
 $(NAME).iso: $(NAME).bin tools/make_config_files.sh
 	@echo
@@ -38,4 +45,5 @@ clean:
 	rm -f `find . -type f -name '*.o'`
 	rm -f *.bin *.iso
 	rm -f bochsrc
+	rm -f tools/make_init_rd
 	rm -rf isodir
