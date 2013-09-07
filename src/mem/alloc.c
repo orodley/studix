@@ -143,14 +143,10 @@ Footer *unify_right(Header *header, Footer *footer, Heap *heap)
 			potential_header->size - sizeof(Footer));
 
 		// Remove the header from the index
-		size_t i;
-		for (i = 0; i < heap->index.size; i++)
-			if (ordered_array_lookup(&heap->index, i) == potential_header)
-				break;
+		int32_t i = find_header_index(heap, potential_header);
 
-		// Make sure we actually found it
-		ASSERT(i < heap->index.size);
-
+		// It should definitely be in the index
+		ASSERT(i != -1);
 		ordered_array_remove(&heap->index, i);
 	}
 
@@ -189,12 +185,9 @@ void free(Heap *heap, void *ptr)
 			footer = make_footer((uintptr_t)assoc_footer(header), header);
 		} else {
 			// We're not going to be around anymore
-			size_t i;
-			for (i = 0; i < heap->index.size; i++)
-				if (ordered_array_lookup(&heap->index, i) == header)
-					break;
+			int32_t i = find_header_index(heap, header);
 
-			if (i < heap->index.size)
+			if (i != -1)
 				ordered_array_remove(&heap->index, i);
 		}
 	}

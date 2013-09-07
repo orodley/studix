@@ -148,3 +148,12 @@ Header *header_for(uintptr_t ptr)
 {
 	return (Header*)(ptr - sizeof(Header));
 }
+
+int32_t find_header_index(Heap *heap, Header *header)
+{
+	for (size_t i = 0; i < heap->index.size; i++)
+		if (ordered_array_lookup(&heap->index, i) == header)
+			return i;
+
+	return -1;
+}

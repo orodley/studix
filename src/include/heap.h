@@ -42,6 +42,8 @@ Footer *make_footer(uintptr_t loc, Header *assoc_header);
 Footer *assoc_footer(Header *header);
 Header *header_for(uintptr_t ptr);
 
+int32_t find_header_index(Heap *heap, Header *header);
+
 #define HEAP_START      0xC0000000
 #define HEAP_INIT_SIZE    0x100000
 #define HEAP_MIN_SIZE      0x70000
