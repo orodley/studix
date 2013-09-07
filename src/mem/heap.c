@@ -138,3 +138,13 @@ size_t contract(Heap *heap, size_t new_size)
 	heap->end_addr = heap->start_addr + new_size;
 	return new_size;
 }
+
+Footer *assoc_footer(Header *header)
+{
+	return (Footer*)((uintptr_t)header + header->size - sizeof(Footer));
+}
+
+Header *header_for(uintptr_t ptr)
+{
+	return (Header*)(ptr - sizeof(Header));
+}

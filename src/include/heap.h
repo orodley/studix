@@ -39,6 +39,9 @@ int8_t  header_comparer(void *a, void *b);
 Header *make_header(uintptr_t loc, size_t size, bool is_hole);
 Footer *make_footer(uintptr_t loc, Header *assoc_header);
 
+Footer *assoc_footer(Header *header);
+Header *header_for(uintptr_t ptr);
+
 #define HEAP_START      0xC0000000
 #define HEAP_INIT_SIZE    0x100000
 #define HEAP_MIN_SIZE      0x70000

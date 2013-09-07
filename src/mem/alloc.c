@@ -35,8 +35,7 @@ static void make_space(Heap *heap, size_t needed_size)
 		Header *header = ordered_array_lookup(&heap->index, header_index);
 		header->size  += new_length - old_length;
 
-		make_footer((uintptr_t)header + header->size - sizeof(Footer),
-				header);
+		make_footer((uintptr_t)assoc_footer(header), header);
 	} else {
 		Header *header =
 			make_header(old_end_addr, new_length - old_length, true);
@@ -103,9 +102,7 @@ void *alloc(Heap *heap, size_t size, bool align)
 		// So we now create a new header and footer for this new block
 		Header *new_hole_header = make_header(orig_hole_pos + total_block_size,
 				orig_hole_size - total_block_size, true);
-
-		Footer *new_hole_footer  = (Footer*)((uintptr_t)new_hole_header +
-			new_hole_header->size - sizeof(Footer));
+		Footer *new_hole_footer = assoc_footer(new_hole_header);
 
 		if ((uintptr_t)new_hole_footer + sizeof(Footer) < heap->end_addr) {
 			new_hole_footer->magic  = HEAP_MAGIC;
@@ -166,10 +163,9 @@ void free(Heap *heap, void *ptr)
 		return;
 
 	// Find the header and footer for the pointer
-	Header *orig_header = (Header*)((uintptr_t)ptr - sizeof(Header));
+	Header *orig_header = header_for((uintptr_t)ptr);
 	Header *header      = orig_header;
-	Footer *footer      = (Footer*)((uintptr_t)header + header->size -
-			sizeof(Footer));
+	Footer *footer      = assoc_footer(header);
 
 	// Sanity checks
 	// Check the footer has a correct pointer to the header
@@ -190,8 +186,7 @@ void free(Heap *heap, void *ptr)
 		if (header->size > old_length - new_length) {
 			// We'll still exist, so resize us
 			header->size -= old_length - new_length;
-			footer        = make_footer((uintptr_t)header + header->size -
-					sizeof(Footer), header);
+			footer = make_footer((uintptr_t)assoc_footer(header), header);
 		} else {
 			// We're not going to be around anymore
 			size_t i;
