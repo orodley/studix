@@ -31,8 +31,9 @@ typedef struct Heap
 Heap   *create_heap(uintptr_t start, uintptr_t end, uintptr_t max,
 	bool supervisor, bool readonly);
 int32_t find_smallest_hole(size_t size, bool align, Heap *heap);
-void    expand(size_t new_size, Heap *heap);
-size_t  contract(size_t new_size, Heap *heap);
+
+void   expand(  Heap *heap, size_t new_size);
+size_t contract(Heap *heap, size_t new_size);
 
 int8_t  header_comparer(void *a, void *b);
 Header *make_header(uintptr_t loc, size_t size, bool is_hole);

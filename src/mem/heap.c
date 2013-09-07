@@ -97,7 +97,7 @@ Heap *create_heap(uintptr_t start, uintptr_t end, uintptr_t max,
 	return heap;
 }
 
-void expand(size_t new_size, Heap *heap)
+void expand(Heap *heap, size_t new_size)
 {
 	// Sanity check
 	ASSERT(heap->start_addr + new_size > heap->end_addr);
@@ -119,7 +119,7 @@ void expand(size_t new_size, Heap *heap)
 	heap->end_addr = heap->start_addr + new_size;
 }
 
-size_t contract(size_t new_size, Heap *heap)
+size_t contract(Heap *heap, size_t new_size)
 {
 	// Sanity check.
 	ASSERT(heap->start_addr + new_size < heap->end_addr);

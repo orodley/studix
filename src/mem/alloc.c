@@ -9,8 +9,6 @@
 #include "heap.h"
 #include "page.h"
 
-extern Page_dir *kernel_dir;
-
 void *alloc(size_t size, bool align, Heap *heap)
 {
 	// Account for header/footer
@@ -23,7 +21,7 @@ void *alloc(size_t size, bool align, Heap *heap)
 		uintptr_t old_length   = old_end_addr - heap->start_addr;
 
 		// Expand the heap!
-		expand(old_length + total_block_size, heap);
+		expand(heap, old_length + total_block_size);
 		uintptr_t new_length = heap->end_addr - heap->start_addr;
 
 		// Find the last header
@@ -180,8 +178,8 @@ void free(void *ptr, Heap *heap)
 	// We can contract the heap if this hole is at the end
 	if ((uintptr_t)footer + sizeof(Footer) == heap->end_addr) {
 		size_t old_length = heap->end_addr - heap->start_addr;
-		size_t new_length = contract(((uintptr_t)header - heap->start_addr),
-				heap);
+		size_t new_length = contract(heap,
+				(uintptr_t)header - heap->start_addr);
 		if (header->size > old_length - new_length) {
 			// We'll still exist, so resize us
 			header->size -= old_length - new_length;
