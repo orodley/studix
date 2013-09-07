@@ -22,12 +22,12 @@ run: $(NAME).iso
 bochs: $(NAME).iso
 	bochs
 
-$(NAME).iso: $(NAME).bin make_config_files.sh
+$(NAME).iso: $(NAME).bin tools/make_config_files.sh
 	@echo
 	@echo Generating disk image...
 	mkdir -p isodir/boot/grub
 	cp $(NAME).bin isodir/boot/
-	./make_config_files.sh $(NAME)
+	tools/make_config_files.sh $(NAME)
 	grub-mkrescue -o $@ isodir
 
 $(NAME).bin: linker.ld $(OBJS)
