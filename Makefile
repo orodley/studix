@@ -45,5 +45,5 @@ clean:
 	rm -f `find . -type f -name '*.o'`
 	rm -f *.bin *.iso
 	rm -f bochsrc
-	rm -f tools/make_init_rd
+	rm -f tools/make_initrd
 	rm -rf isodir
