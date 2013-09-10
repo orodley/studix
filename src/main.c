@@ -20,7 +20,7 @@ void notify(void (*func)(), char *str)
 void timer_notify(void (*func)(), char *str)
 {
 	// TODO: Add long printing so this actually works...
-	term_printf("[%d] ", (int)uptime());
+	term_printf("[%lms] ", uptime());
 	notify(func, str);
 }
 
@@ -53,6 +53,7 @@ void kernel_main(Multiboot_info *multiboot)
 	notify(init_gdt,   "Initializing GDT...");
 	notify(init_idt,   "Initializing IDT...");
 	notify(init_timer, "Initializing PIT..."); // Now we can use timer_notify()
+	__asm__ volatile ("sti");	// Enable interrupts
 
 	ASSERT(multiboot->module_count > 0);
 	uintptr_t initrd_addr = *(uintptr_t*)multiboot->modules_addr;
@@ -71,7 +72,6 @@ void kernel_main(Multiboot_info *multiboot)
 
 	timer_notify(init_ps2,    "Initializing PS/2 controller...");
 
-	__asm__ volatile ("sti");	// Enable interrupts
 
 	// Allocate some memory, just for fun
 	uintptr_t a = kmalloc(8);
