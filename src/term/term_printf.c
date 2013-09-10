@@ -4,7 +4,7 @@
 #include <stdarg.h>
 #include "term.h"
 
-static void term_print_decu(unsigned int x)
+static void term_print_decu(unsigned long x)
 {
 	unsigned int divisor = 1;
 
@@ -18,7 +18,7 @@ static void term_print_decu(unsigned int x)
 		term_putchar(((x / divisor) % 10) + '0');
 }
 
-static void term_print_dec(int x)
+static void term_print_dec(long x)
 {
 	if (x < 0) {
 		term_putchar('-');
@@ -68,6 +68,9 @@ void term_printf(const char *fmt, ...)
 				break;
 			case 'u':
 				term_print_decu(va_arg(args, unsigned int));
+				break;
+			case 'l':
+				term_print_decu(va_arg(args, unsigned long));
 				break;
 			case 'x':
 				term_print_hex(va_arg(args, unsigned int), false);
