@@ -12,3 +12,5 @@ typedef struct File_header
 	size_t start;
 	size_t length;
 } File_header;
+
+FS_node *init_initrd(uintptr_t location);
