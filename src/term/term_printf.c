@@ -4,9 +4,9 @@
 #include <stdarg.h>
 #include "term.h"
 
-static void term_print_dec(int x)
+static void term_print_decu(unsigned int x)
 {
-	int divisor = 1;
+	unsigned int divisor = 1;
 
 	for (; divisor <= x; divisor *= 10)
 		;
@@ -16,6 +16,16 @@ static void term_print_dec(int x)
 
 	for (; divisor > 0; divisor /= 10)
 		term_putchar(((x / divisor) % 10) + '0');
+}
+
+static void term_print_dec(int x)
+{
+	if (x < 0) {
+		term_putchar('-');
+		x = -x;
+	}
+
+	term_print_decu(x);
 }
 
 static const size_t CASE_DIFF = 32;
@@ -55,6 +65,9 @@ void term_printf(const char *fmt, ...)
 				break;
 			case 'd':
 				term_print_dec(va_arg(args, int));
+				break;
+			case 'u':
+				term_print_decu(va_arg(args, unsigned int));
 				break;
 			case 'x':
 				term_print_hex(va_arg(args, unsigned int), false);
