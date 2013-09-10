@@ -19,6 +19,7 @@ void notify(void (*func)(), char *str)
 
 void timer_notify(void (*func)(), char *str)
 {
+	// TODO: Add long printing so this actually works...
 	term_printf("[%d] ", (int)uptime());
 	notify(func, str);
 }
