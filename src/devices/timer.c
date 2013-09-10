@@ -11,14 +11,14 @@ static const uint8_t TIMER_CMD        = 0x43;
 static const int BASE_FREQUENCY    = 1193180;
 static const int MILLISECOND_FREQ  = 1000;
 
-static long milli_uptime = 0;
+static unsigned long milli_uptime = 0;
 
 static void timer_handler(Registers regs)
 {
 	milli_uptime++;
 }
 
-long uptime()
+unsigned long uptime()
 {
 	return milli_uptime;
 }
