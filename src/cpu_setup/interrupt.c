@@ -5,6 +5,7 @@
 #include "idt.h"
 #include "interrupt.h"
 #include "term.h"
+#include "panic.h"
 
 static const char *interrupt_names[] =
 {
@@ -52,7 +53,7 @@ void isr_handler(Registers regs)
 	if (handler)
 		handler(regs);
 	else
-		term_printf("Unhandled interrupt: %s\n", interrupt_names[regs.int_no]);
+		PANIC(interrupt_names[regs.int_no]);
 }
 
 void register_interrupt_handler(uint8_t i, Handler handler)
