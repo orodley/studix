@@ -104,7 +104,7 @@ FS_node *init_initrd(uintptr_t location)
 	initrd_dev->node_ptr    = NULL;
 	initrd_dev->impl        = 0;
 
-	size_t num_files = *(size_t*)initrd_start;
+	size_t num_files = *(uint8_t*)initrd_start;
 	root_nodes = (FS_node*)kmalloc(sizeof(FS_node) * num_files);
 	num_root_nodes = num_files;
 
