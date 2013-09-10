@@ -1,5 +1,6 @@
 // Print formatted output to the VGA terminal
 
+#include <stdbool.h>
 #include <stdarg.h>
 #include "term.h"
 
@@ -19,7 +20,7 @@ static void term_print_dec(int x)
 
 static const size_t CASE_DIFF = 32;
 
-static void term_print_hex(unsigned int x, int upper)
+static void term_print_hex(unsigned int x, bool upper)
 {
 	int shift = (sizeof(unsigned int) * 8) - 4;
 	for (; ((x >> shift) & 0xF) == 0 && shift > 0; shift -= 4)
@@ -56,14 +57,14 @@ void term_printf(const char *fmt, ...)
 				term_print_dec(va_arg(args, int));
 				break;
 			case 'x':
-				term_print_hex(va_arg(args, unsigned int), 0);
+				term_print_hex(va_arg(args, unsigned int), false);
 				break;
 			case 'X':
-				term_print_hex(va_arg(args, unsigned int), 1);
+				term_print_hex(va_arg(args, unsigned int), true);
 				break;
 			case 'p':
 				term_putsn("0x");
-				term_print_hex(va_arg(args, unsigned int), 0);
+				term_print_hex(va_arg(args, unsigned int), false);
 				break;
 			case 's':
 				term_putsn(va_arg(args, char*));
