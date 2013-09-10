@@ -11,6 +11,7 @@ static void term_print_dec(int x)
 		;
 
 	divisor /= 10;
+	divisor = divisor == 0 ? 1 : divisor; // Always print at least one char
 
 	for (; divisor > 0; divisor /= 10)
 		term_putchar(((x / divisor) % 10) + '0');
