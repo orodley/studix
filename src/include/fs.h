@@ -6,14 +6,16 @@
 
 #define MAX_NAME_LENGTH 128 // Maximum length of a filename
 
-// FS_node.type defines
-#define       FILE_NODE 1
-#define        DIR_NODE 2
-#define   CHAR_DEV_NODE 3
-#define  BLOCK_DEV_NODE 4
-#define       PIPE_NODE 5
-#define    SYMLINK_NODE 6
-#define MOUNTPOINT_NODE 8 // Not 7; we want to OR it with DIR_NODE sometimes
+typedef enum Node_type
+{
+	FILE_NODE       = 1,
+	DIR_NODE,
+	CHAR_DEV_NODE,
+	BLOCK_DEV_NODE,
+	PIPE_NODE,
+	SYMLINK_NODE,
+	MOUNTPOINT_NODE = 8 // We want to OR with DIR_NODE sometimes
+} Node_type;
 
 struct FS_node;
 struct Dir_entry;
@@ -36,7 +38,7 @@ typedef struct FS_node
 	uint32_t        uid;
 	uint32_t        gid;
 	uint32_t        impl;
-	uint8_t         type;
+	Node_type       type;
 
 	struct FS_node *node_ptr; // Used in symlinks and mountpoints
 
