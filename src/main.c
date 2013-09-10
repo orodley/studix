@@ -1,8 +1,10 @@
 #include <stdint.h>
-#include "kmalloc.h"
 #include "assert.h"
 #include "gdt.h"
 #include "idt.h"
+#include "initrd.h"
+#include "kmalloc.h"
+#include "multiboot.h"
 #include "term.h"
 #include "timer.h"
 #include "page.h"
@@ -21,22 +23,54 @@ void timer_notify(void (*func)(), char *str)
 	notify(func, str);
 }
 
-void kernel_main()
+void traverse_fs(FS_node *root)
+{
+	size_t i = 0;
+	Dir_entry *dir_entry;
+	while ((dir_entry = read_dir_node(root, i)) != NULL) {
+		FS_node *node = find_dir_node(root, dir_entry->name);
+
+		if (node->type == FILE_NODE) {
+			char buf[256];
+			size_t c = read_fs_node(node, 0, 256, buf);
+
+			term_printf("Found file: %s\n Contents = '", node->name);
+			for (size_t j = 0; j < c; j++)
+				term_putchar(buf[j]);
+			term_puts("'");
+		}
+
+		i++;
+	}
+}
+
+void kernel_main(Multiboot_info *multiboot)
 {
 	init_term();
 	term_puts(NAME " booting...");
 
 	notify(init_gdt,   "Initializing GDT...");
 	notify(init_idt,   "Initializing IDT...");
-	notify(init_timer, "Initializing PIT...");
+	notify(init_timer, "Initializing PIT..."); // Now we can use timer_notify()
 
-	// Now we can use timer_notify()!
-	timer_notify(init_ps2,    "Initializing PS/2 controller...");
+	ASSERT(multiboot->module_count > 0);
+	uintptr_t initrd_addr = *(uintptr_t*)multiboot->modules_addr;
+	uintptr_t initrd_end  = *(uintptr_t*)(multiboot->modules_addr + 4);
+	// Make sure the placment allocator doesn't overwrite the initial ramdisk
+	extern uintptr_t placement_addr;
+	placement_addr = initrd_end;
+
 	timer_notify(init_paging, "Initializing page table...");
 
-	__asm__ volatile ("sti");	// Enable interrupts
+	term_putsn("Loading initial ramdisk...");
+	FS_node *root = init_initrd(initrd_addr);
+	term_puts(" done");
 
-	term_printf("term_printf is %d%% p%cre %s\n", 100, 'u', "awesome");
+	traverse_fs(root);
+
+	timer_notify(init_ps2,    "Initializing PS/2 controller...");
+
+	__asm__ volatile ("sti");	// Enable interrupts
 
 	// Allocate some memory, just for fun
 	uintptr_t a = kmalloc(8);

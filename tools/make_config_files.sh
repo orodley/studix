@@ -10,6 +10,7 @@ set timeout=0
 
 menuentry "$1" {
 	multiboot /boot/$1.bin
+	module    /boot/initrd.img
 }
 EOF
 

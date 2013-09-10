@@ -26,16 +26,20 @@ run: $(NAME).iso
 bochs: $(NAME).iso
 	bochs
 
-tools/make_initrd: tools/make_initrd.c
-	$(HOST_CC) -o $@ $(HOST_CFLAGS) $<
-
-$(NAME).iso: $(NAME).bin tools/make_config_files.sh
+$(NAME).iso: $(NAME).bin tools/make_config_files.sh isodir/boot/initrd.img
 	@echo
 	@echo Generating disk image...
-	mkdir -p isodir/boot/grub
 	cp $(NAME).bin isodir/boot/
 	tools/make_config_files.sh $(NAME)
 	grub-mkrescue -o $@ isodir
+
+isodir/boot/initrd.img: tools/make_initrd
+	@echo Generating initial ramdisk...
+	mkdir -p isodir/boot/grub
+	tools/make_initrd initrd isodir/boot/initrd.img
+
+tools/make_initrd: tools/make_initrd.c
+	$(HOST_CC) -o $@ $(HOST_CFLAGS) $<
 
 $(NAME).bin: linker.ld $(OBJS)
 	$(LD) $(LDFLAGS) -T linker.ld -o $@ $(OBJS)

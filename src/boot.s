@@ -26,6 +26,7 @@ stack_top:
 .global _start
 _start:
 	movl 	$stack_top, %esp	# Set up the stack
+	pushl	%ebx			# Push pointer to multiboot info
 	cli				# Disable interrupts
 
 	call 	kernel_main		# Jump to kernel entry point
