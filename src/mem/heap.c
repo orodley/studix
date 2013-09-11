@@ -43,9 +43,9 @@ int32_t find_smallest_hole(Heap *heap, size_t size, bool align)
 	return -1;
 }
 
-int8_t header_comparer(void *a, void *b)
+bool header_comparer(void *a, void *b)
 {
-	return ((Header*)a)->size < ((Header*)b)->size ? 1 : 0;
+	return ((Header*)a)->size < ((Header*)b)->size;
 }
 
 Header *make_header(uintptr_t loc, size_t size, bool is_hole)

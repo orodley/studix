@@ -6,9 +6,9 @@
 #include "ordered_array.h"
 #include "term.h"
 
-int8_t std_comparer(void *a, void *b)
+bool std_comparer(void *a, void *b)
 {
-	return (a < b) ? 1 : 0;
+	return (a < b);
 }
 
 Ordered_array create_ordered_array(size_t max_size, Comparer comparer)

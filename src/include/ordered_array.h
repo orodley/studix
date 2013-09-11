@@ -1,8 +1,10 @@
 // Interface for ordered arrays
+
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
-typedef int8_t (*Comparer)(void*, void*);
+typedef bool (*Comparer)(void*, void*);
 
 typedef struct Ordered_array
 {
@@ -12,7 +14,7 @@ typedef struct Ordered_array
 	Comparer comparer;
 } Ordered_array;
 
-int8_t std_comparer(void*, void*);
+bool std_comparer(void*, void*);
 
 Ordered_array create_ordered_array(size_t max_size, Comparer comparer);
 Ordered_array place_ordered_array(void *addr, size_t max_size,
