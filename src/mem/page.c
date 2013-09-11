@@ -26,6 +26,16 @@ bool aligned(uintptr_t ptr)
 	return (ptr & 0xFFF) == 0;
 }
 
+uintptr_t align_up(uintptr_t ptr)
+{
+	if (!aligned(ptr)) {
+		ptr -= ptr % PAGE_SIZE;
+		return ptr + PAGE_SIZE;
+	} else {
+		return ptr;
+	}
+}
+
 static void set_frame(uint32_t frame_addr)
 {
 	uint32_t frame  = frame_addr / PAGE_SIZE;

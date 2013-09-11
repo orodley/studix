@@ -29,11 +29,8 @@ static uintptr_t kmalloc_aux(size_t size, bool align,
 		return (uintptr_t)addr;
 	}
 	// If we need a page-aligned address and its not aligned...
-	if (align && !aligned(placement_addr)) {
-		// ...align it
-		placement_addr &= 0xFFFFF000;
-		placement_addr += PAGE_SIZE;
-	}
+	if (align)
+		placement_addr = align_up(placement_addr);
 
 	if (phys)
 		*phys = placement_addr;

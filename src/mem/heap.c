@@ -29,6 +29,7 @@ int32_t find_smallest_hole(Heap *heap, size_t size, bool align)
 
 		if (align) {
 			uintptr_t loc    = (uintptr_t)header;
+
 			size_t    offset = 0;
 			if (!aligned(loc + sizeof(Header)))
 				offset = PAGE_SIZE - (loc + sizeof(Header)) % PAGE_SIZE;
@@ -72,17 +73,14 @@ Heap *create_heap(uintptr_t start, uintptr_t end, uintptr_t max,
 	Heap *heap  = (Heap*)kmalloc(sizeof(Heap));
 
 	// Make sure start and end are page-aligned
-	ASSERT(start % 0x1000 == 0);
-	ASSERT(end   % 0x1000 == 0);
+	ASSERT(aligned(start));
+	ASSERT(aligned(end));
 
 	heap->index = place_ordered_array((void*)start, HEAP_INDEX_SIZE,
 			header_comparer);
 	start      += sizeof(void*) * HEAP_INDEX_SIZE;
 
-	if (!aligned(start)) {
-		start &= 0xFFFFF000;
-		start += PAGE_SIZE;
-	}
+	align_up(start);
 
 	heap->start_addr = start;
 	heap->end_addr   = end;
@@ -102,10 +100,7 @@ void expand(Heap *heap, size_t new_size)
 	// Sanity check
 	ASSERT(heap->start_addr + new_size > heap->end_addr);
 
-	if (!aligned(new_size)) {
-		new_size &= 0xFFFFF000;
-		new_size += PAGE_SIZE;
-	}
+	new_size = align_up(new_size);
 
 	// We don't want to expand over the max address
 	ASSERT(heap->start_addr + new_size <= heap->max_addr);
@@ -124,10 +119,7 @@ size_t contract(Heap *heap, size_t new_size)
 	// Sanity check.
 	ASSERT(heap->start_addr + new_size < heap->end_addr);
 
-	if ((new_size & PAGE_SIZE) != 0) {
-		new_size &= PAGE_SIZE;
-		new_size += PAGE_SIZE;
-	}
+	new_size = align_up(new_size);
 	if (new_size < HEAP_MIN_SIZE)
 		new_size = HEAP_MIN_SIZE;
 
