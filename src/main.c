@@ -12,9 +12,8 @@
 
 void notify(void (*func)(), char *str)
 {
-	term_putsn(str);
+	term_puts(str);
 	func();
-	term_puts(" done");
 }
 
 void print_time()
@@ -47,11 +46,11 @@ size_t file_count(FS_node *root)
 void kernel_main(Multiboot_info *multiboot)
 {
 	init_term();
-	term_puts(NAME " booting...");
+	term_puts(NAME " booting");
 
-	notify(init_gdt,   "Initializing GDT...");
-	notify(init_idt,   "Initializing IDT...");
-	notify(init_timer, "Initializing PIT..."); // Now we can use timer_notify()
+	notify(init_gdt,   "Initializing GDT");
+	notify(init_idt,   "Initializing IDT");
+	notify(init_timer, "Initializing PIT"); // Now we can use timer_notify()
 	__asm__ volatile ("sti");	// Enable interrupts
 
 	ASSERT(multiboot->module_count > 0);
@@ -61,14 +60,14 @@ void kernel_main(Multiboot_info *multiboot)
 	extern uintptr_t placement_addr;
 	placement_addr = initrd_end;
 
-	timer_notify(init_paging, "Initializing page table...");
+	timer_notify(init_paging, "Initializing page table");
 
 	print_time();
-	term_putsn("Loading initial ramdisk...");
+	term_putsn("Loading initial ramdisk");
 	FS_node *root = init_initrd(initrd_addr);
-	term_printf(" done. Found %u file(s) in initrd\n", file_count(root));
+	term_printf(". Found %u file(s)\n", file_count(root));
 
-	timer_notify(init_ps2,    "Initializing PS/2 controller...");
+	timer_notify(init_ps2, "Initializing PS/2 controller");
 
 	// Allocate some memory, just for fun
 	uintptr_t a = kmalloc(8);
