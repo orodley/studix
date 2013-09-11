@@ -20,23 +20,24 @@ HOST_CFLAGS = -std=c99 -Isrc/include -Wall -Wextra -pedantic -Werror
 
 all: $(NAME).iso
 
-run: $(NAME).iso
-	$(EMU) -boot order=d -cdrom $(NAME).iso
+run: $(NAME).bin initrd.img
+	$(EMU) -boot order=d -kernel $(NAME).bin -initrd initrd.img
 
 bochs: $(NAME).iso
 	bochs
 
-$(NAME).iso: $(NAME).bin tools/make_config_files.sh isodir/boot/initrd.img
+$(NAME).iso: $(NAME).bin tools/make_config_files.sh initrd.img
 	@echo
 	@echo Generating disk image...
 	cp $(NAME).bin isodir/boot/
+	cp initrd.img  isodir/boot/
 	tools/make_config_files.sh $(NAME)
 	grub-mkrescue -o $@ isodir
 
-isodir/boot/initrd.img: tools/make_initrd
+initrd.img: tools/make_initrd
 	@echo Generating initial ramdisk...
 	mkdir -p isodir/boot/grub
-	tools/make_initrd initrd isodir/boot/initrd.img
+	tools/make_initrd initrd initrd.img
 
 tools/make_initrd: tools/make_initrd.c
 	$(HOST_CC) -o $@ $(HOST_CFLAGS) $<

@@ -2,4 +2,5 @@
 isodir
 *.bin
 *.iso
+*.img
 bochsrc
