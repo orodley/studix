@@ -17,31 +17,31 @@ void notify(void (*func)(), char *str)
 	term_puts(" done");
 }
 
-void timer_notify(void (*func)(), char *str)
+void print_time()
 {
 	term_printf("[%lms] ", uptime());
+}
+
+void timer_notify(void (*func)(), char *str)
+{
+	print_time();
 	notify(func, str);
 }
 
-void traverse_fs(FS_node *root)
+size_t file_count(FS_node *root)
 {
-	size_t i = 0;
+	size_t i = 0, count = 0;
 	Dir_entry *dir_entry;
 	while ((dir_entry = read_dir_node(root, i)) != NULL) {
 		FS_node *node = find_dir_node(root, dir_entry->name);
 
-		if (node->type == FILE_NODE) {
-			char buf[256];
-			size_t c = read_fs_node(node, 0, 256, buf);
-
-			term_printf("Found file: %s\n Contents = '", node->name);
-			for (size_t j = 0; j < c; j++)
-				term_putchar(buf[j]);
-			term_puts("'");
-		}
+		if (node->type == FILE_NODE)
+			count++;
 
 		i++;
 	}
+
+	return count;
 }
 
 void kernel_main(Multiboot_info *multiboot)
@@ -63,22 +63,19 @@ void kernel_main(Multiboot_info *multiboot)
 
 	timer_notify(init_paging, "Initializing page table...");
 
+	print_time();
 	term_putsn("Loading initial ramdisk...");
 	FS_node *root = init_initrd(initrd_addr);
-	term_puts(" done");
-
-	traverse_fs(root);
+	term_printf(" done. Found %u file(s) in initrd\n", file_count(root));
 
 	timer_notify(init_ps2,    "Initializing PS/2 controller...");
-
 
 	// Allocate some memory, just for fun
 	uintptr_t a = kmalloc(8);
 	uintptr_t b = kmalloc(8);
-	term_printf("a: %p, b = %p", a, b);
-
 	kfree((void*)b);
 	kfree((void*)a);
 	uintptr_t c = kmalloc(12);
-	term_printf(", c: %p\n", c);
+
+	ASSERT(a == c); // a & b should have been merged
 }
