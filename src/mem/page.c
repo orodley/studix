@@ -21,6 +21,11 @@ extern uintptr_t placement_addr;
 #define BIT_INDEX(a)  (a / (8 * 4))
 #define BIT_OFFSET(a) (a % (8 * 4))
 
+bool aligned(uintptr_t ptr)
+{
+	return (ptr & 0xFFF) == 0;
+}
+
 static void set_frame(uint32_t frame_addr)
 {
 	uint32_t frame  = frame_addr / PAGE_SIZE;

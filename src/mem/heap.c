@@ -30,7 +30,7 @@ int32_t find_smallest_hole(Heap *heap, size_t size, bool align)
 		if (align) {
 			uintptr_t loc    = (uintptr_t)header;
 			size_t    offset = 0;
-			if (((loc + sizeof(Header)) & 0xFFF) != 0)
+			if (!aligned(loc + sizeof(Header)))
 				offset = PAGE_SIZE - (loc + sizeof(Header)) % PAGE_SIZE;
 
 			if (header->size - offset >= size)
@@ -79,7 +79,7 @@ Heap *create_heap(uintptr_t start, uintptr_t end, uintptr_t max,
 			header_comparer);
 	start      += sizeof(void*) * HEAP_INDEX_SIZE;
 
-	if ((start & 0xFFF) != 0) {
+	if (!aligned(start)) {
 		start &= 0xFFFFF000;
 		start += PAGE_SIZE;
 	}
@@ -102,7 +102,7 @@ void expand(Heap *heap, size_t new_size)
 	// Sanity check
 	ASSERT(heap->start_addr + new_size > heap->end_addr);
 
-	if ((new_size & 0xFFF) != 0) {
+	if (!aligned(new_size)) {
 		new_size &= 0xFFFFF000;
 		new_size += PAGE_SIZE;
 	}

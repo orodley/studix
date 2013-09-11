@@ -32,6 +32,7 @@ typedef struct Page_dir
 	uint32_t physical_addr;
 } Page_dir;
 
+bool aligned(uintptr_t ptr);
 Page_entry *get_page(uint32_t addr, bool make_table, Page_dir *dir);
 void alloc_frame(Page_entry *page, bool kernel, bool writeable);
 void free_frame(Page_entry *page);
