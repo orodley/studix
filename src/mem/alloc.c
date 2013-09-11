@@ -69,7 +69,7 @@ void *alloc(Heap *heap, size_t size, bool align)
 	}
 
 	// If we need to page-align it, then do, and create a new hole in the gap
-	if (align && ((orig_hole_pos + sizeof(Header)) & 0xFFFFF000) != 0) {
+	if (align && ((orig_hole_pos + sizeof(Header)) & 0xFFF) != 0) {
 		uintptr_t new_hole_loc  = orig_hole_pos + PAGE_SIZE -
 			(orig_hole_pos & 0xFFF) - sizeof(Header);
 		Header *new_hole_header =
