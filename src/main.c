@@ -8,6 +8,7 @@
 #include "term.h"
 #include "timer.h"
 #include "page.h"
+#include "pata.h"
 #include "ps2.h"
 
 void notify(void (*func)(), char *str)
@@ -68,6 +69,7 @@ void kernel_main(Multiboot_info *multiboot)
 	term_printf(". Found %u file(s)\n", file_count(root));
 
 	timer_notify(init_ps2, "Initializing PS/2 controller");
+	timer_notify(init_ata, "Initializing ATA controller");
 
 	// Allocate some memory, just for fun
 	uintptr_t a = kmalloc(8);
