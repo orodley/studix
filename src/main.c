@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <string.h>
 #include "assert.h"
 #include "gdt.h"
 #include "idt.h"
@@ -70,6 +71,18 @@ void kernel_main(Multiboot_info *multiboot)
 
 	timer_notify(init_ps2, "Initializing PS/2 controller");
 	timer_notify(init_ata, "Initializing ATA controller");
+
+	// Read some sectors!
+	term_putsn("Reading sector at LBA 2...");
+
+	uint16_t buf[512 / 2];
+	memset(buf, 0xAA, 512 / 2); // Make it obvious if the buffer doesn't change
+	read_abs_sectors(2, 1, buf);
+
+	term_puts(" done. Data follows:");
+	for (size_t i = 0; i < 512 / 2; i++)
+		term_printf("%X%X %X%X ", (buf[i] >> 4) & 0xF, buf[i] & 0xF,
+				buf[i] >> 12, (buf[i] >> 8) & 0xF); // Little endian
 
 	// Allocate some memory, just for fun
 	uintptr_t a = kmalloc(8);

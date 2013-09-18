@@ -2,8 +2,13 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "assert.h"
 #include "dev.h"
 #include "term.h"
+
+// Misc numbers
+static const size_t   SECTOR_SIZE       = 512;
+
 
 // Port bases and offsets
 static const uint16_t PRIMARY_BASE      = 0x1F0;
@@ -11,9 +16,9 @@ static const uint16_t SECONDARY_BASE    = 0x170;
 static const uint16_t DATA              =     0;
 static const uint16_t ERROR             =     1;
 static const uint16_t SECTOR_COUNT      =     2;
-static const uint16_t SECTOR_NUM        =     3;
-static const uint16_t CYL_LOW           =     4;
-static const uint16_t CYL_HIGH          =     5;
+static const uint16_t LBA_LOW           =     3;
+static const uint16_t LBA_MID           =     4;
+static const uint16_t LBA_HIGH          =     5;
 static const uint16_t DRIVE_SELECT      =     6;
 static const uint16_t COM_STAT          =     7;
 
@@ -25,6 +30,7 @@ static const uint16_t SEC_CONTROL       = 0x376;
 static const uint8_t  SEL_MASTER        = 0xA0;
 static const uint8_t  SEL_SLAVE         = 0xB0;
 static const uint8_t  IDENTIFY          = 0xEC;
+static const uint8_t  READ_SECTORS      = 0x20;
 
 
 // Status byte flags
@@ -37,7 +43,7 @@ static const uint8_t  BSY               = 1 << 7;
 
 
 // Interesting indices into the data returned by IDENTIFY
-static const uint64_t MAX_28LBA_SECTORS = 60;
+static const size_t MAX_28LBA_SECTORS = 60;
 
 
 // Current drive state information
@@ -48,7 +54,7 @@ static const uint64_t MAX_28LBA_SECTORS = 60;
 static uint16_t sel_base_port       = 0;
 static uint8_t  sel_master_or_slave = 0;
 
-static uint64_t max_sectors;
+static uint32_t max_sector;
 
 
 static uint8_t read_stat(uint16_t base)
@@ -72,9 +78,9 @@ static void check_drive(uint16_t base, uint8_t master_or_slave)
 
 	// Zero out these 4 ports
 	outb(base + SECTOR_COUNT, 0);
-	outb(base + SECTOR_NUM,   0);
-	outb(base + CYL_LOW,      0);
-	outb(base + CYL_HIGH,     0);
+	outb(base + LBA_LOW,      0);
+	outb(base + LBA_MID,      0);
+	outb(base + LBA_HIGH,     0);
 
 	outb(base + COM_STAT,  IDENTIFY); // Send IDENTIFY command
 	uint8_t stat = read_stat(base);
@@ -95,12 +101,13 @@ static void check_drive(uint16_t base, uint8_t master_or_slave)
 	if ((stat & ERR) != 0) // Something's wrong. Maybe it's ATAPI or SATA
 		return;
 
-	// The drive is ready to send us 256 words of data
-	uint32_t drive_data[256];
-	for (int i = 0; i < 256; i++)
-		drive_data[i] = inl(base + DATA);
+	// The drive is ready to send us 256 (16-bit) words of data
+	uint16_t drive_data[256];
+	for (size_t i = 0; i < 256; i++)
+		drive_data[i] = inw(base + DATA);
 
-	max_sectors = drive_data[MAX_28LBA_SECTORS];
+	max_sector = drive_data[MAX_28LBA_SECTORS] |
+		drive_data[MAX_28LBA_SECTORS + 1] << 16;
 
 	// This drive seems to work, so let's select it
 	sel_base_port       = base;
@@ -133,8 +140,53 @@ void init_ata()
 
 	if (sel_base_port == 0) // We didn't find a (PATA) drive
 		term_puts("No drives attached! What's going on?");
-	else
-		term_printf("Found a drive!\nSelected drive is the %s on the %s bus",
+	else {
+		term_printf("Found a drive!\nSelected drive is the %s on the %s bus\n",
 				sel_master_or_slave == SEL_MASTER ? "master"  : "slave",
 				sel_base_port == PRIMARY_BASE     ? "primary" : "secondary");
+		term_printf("Max LBA value is %d\n", max_sector);
+	}
+}
+
+static void poll()
+{
+	uint8_t stat;
+
+	do
+		stat = read_stat(sel_base_port);
+	while ((stat & BSY) != 0); // TODO: Error detection
+}
+
+// Read sector_count sectors into a buffer, using 28 bit absolute LBA.
+// Buffer must be at least sector_count * SECTOR_SIZE bytes long.
+void read_abs_sectors(uint32_t lba, uint8_t sector_count, uint16_t buf[])
+{
+	const short LBA_BITS = 28;
+
+	// Sanity check; the address shouldn't be more than LBA_BITS bits long
+	ASSERT(lba >> LBA_BITS == 0);
+
+	// First, send a drive select OR'd with the 4 MSB of the address, with bit
+	// 6 set, to indicate this is LBA
+	outb(sel_base_port + DRIVE_SELECT,
+			(lba >> (LBA_BITS - 4)) | sel_master_or_slave | 1 << 6);
+	outb(sel_base_port + SECTOR_COUNT, sector_count); // Send the sector count
+
+	// Now send the 24 LSB of the LBA, in 3 1-byte chunks
+	outb(sel_base_port + LBA_LOW,   lba        & 0xFF);
+	outb(sel_base_port + LBA_MID,  (lba >> 8)  & 0xFF);
+	outb(sel_base_port + LBA_HIGH, (lba >> 16) & 0xFF);
+
+	// Issue the READ_SECTORS command
+	outb(sel_base_port + COM_STAT, READ_SECTORS);
+
+	size_t i = 0;
+	for (; sector_count > 0; sector_count--) {
+		poll();
+
+		__asm__ volatile ("rep insw" :: "c"(SECTOR_SIZE / 2),      // Count
+		                                "d"(sel_base_port + DATA), // Port #
+									    "D"(buf + i));             // Buffer
+		i += SECTOR_SIZE / 2;
+	}
 }
