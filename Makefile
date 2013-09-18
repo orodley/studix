@@ -18,10 +18,10 @@ HOST_CFLAGS = -std=c99 -Isrc/include -Wall -Wextra -pedantic -Werror
 
 .PHONY: all run clean bochs
 
-all: $(NAME).iso
+all: $(NAME).bin initrd.img
 
 run: $(NAME).bin initrd.img
-	$(EMU) -boot order=d -kernel $(NAME).bin -initrd initrd.img
+	$(EMU) -boot order=d -kernel $(NAME).bin -initrd initrd.img -hda disk.img
 
 bochs: $(NAME).iso
 	bochs
