@@ -12,6 +12,8 @@ ASM_OBJS = $(patsubst %.s, %.o, $(shell find src -name '*.s'))
 C_OBJS   = $(patsubst %.c, %.o, $(shell find src -name '*.c'))
 OBJS     = $(C_OBJS) $(ASM_OBJS)
 
+HDD_SIZE = 65536 # 256 MiB
+
 # C compiler used for compiling tools that run on the host during build
 HOST_CC     = gcc
 HOST_CFLAGS = -std=c99 -Isrc/include -Wall -Wextra -pedantic -Werror
@@ -20,7 +22,7 @@ HOST_CFLAGS = -std=c99 -Isrc/include -Wall -Wextra -pedantic -Werror
 
 all: $(NAME).bin initrd.img
 
-run: $(NAME).bin initrd.img
+run: $(NAME).bin initrd.img disk.img
 	$(EMU) -boot order=d -kernel $(NAME).bin -initrd initrd.img -hda disk.img
 
 bochs: $(NAME).iso
@@ -39,6 +41,9 @@ initrd.img: tools/make_initrd
 	mkdir -p isodir/boot/grub
 	tools/make_initrd initrd initrd.img
 
+disk.img:
+	genext2fs -B 4096 -d hdd -U -N 4096 -b $(HDD_SIZE) disk.img
+
 tools/make_initrd: tools/make_initrd.c
 	$(HOST_CC) -o $@ $(HOST_CFLAGS) $<
 
@@ -48,7 +53,7 @@ $(NAME).bin: linker.ld $(OBJS)
 
 clean:
 	rm -f `find . -type f -name '*.o'`
-	rm -f *.bin *.iso
+	rm -f *.bin *.iso *.img
 	rm -f bochsrc
 	rm -f tools/make_initrd
 	rm -rf isodir

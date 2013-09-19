@@ -7,7 +7,7 @@
 #include "term.h"
 
 // Misc numbers
-static const size_t   SECTOR_SIZE       = 512;
+const size_t SECTOR_SIZE = 512;
 
 
 // Port bases and offsets
