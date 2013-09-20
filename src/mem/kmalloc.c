@@ -15,7 +15,7 @@ extern Page_dir *kernel_dir;
 
 uintptr_t placement_addr = (uintptr_t)&end;
 
-static uintptr_t kmalloc_aux(size_t size, bool align,
+static void *kmalloc_aux(size_t size, bool align,
 		uint32_t *phys)
 {
 	if (kheap != NULL) {
@@ -26,7 +26,7 @@ static uintptr_t kmalloc_aux(size_t size, bool align,
 			*phys = page->frame * PAGE_SIZE + ((uintptr_t)addr & 0xFFF);
 		}
 
-		return (uintptr_t)addr;
+		return addr;
 	}
 	// If we need a page-aligned address and its not aligned...
 	if (align)
@@ -38,25 +38,25 @@ static uintptr_t kmalloc_aux(size_t size, bool align,
 	uintptr_t temp = placement_addr;
 	placement_addr += size;
 
-	return temp;
+	return (void*)temp;
 }
 
-uintptr_t kmalloc(size_t size)
+void *kmalloc(size_t size)
 {
 	return kmalloc_aux(size, false, NULL);
 }
 
-uintptr_t kmalloc_a(size_t size)
+void *kmalloc_a(size_t size)
 {
 	return kmalloc_aux(size, true, NULL);
 }
 
-uintptr_t kmalloc_p(size_t size,  uint32_t *phys)
+void *kmalloc_p(size_t size,  uint32_t *phys)
 {
 	return kmalloc_aux(size, false, phys);
 }
 
-uintptr_t kmalloc_ap(size_t size, uint32_t *phys)
+void *kmalloc_ap(size_t size, uint32_t *phys)
 {
 	return kmalloc_aux(size, true, phys);
 }

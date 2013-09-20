@@ -75,11 +75,11 @@ void kernel_main(Multiboot_info *multiboot)
 	timer_notify(init_fs,  "Initializing ext2 filesystem");
 
 	// Allocate some memory, just for fun
-	uintptr_t a = kmalloc(8);
-	uintptr_t b = kmalloc(8);
+	uintptr_t a = (uintptr_t)kmalloc(8);
+	uintptr_t b = (uintptr_t)kmalloc(8);
 	kfree((void*)b);
 	kfree((void*)a);
-	uintptr_t c = kmalloc(12);
+	uintptr_t c = (uintptr_t)kmalloc(12);
 
 	ASSERT(a == c); // a & b should have been merged
 }
