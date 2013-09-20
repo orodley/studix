@@ -20,7 +20,7 @@ HOST_CFLAGS = -std=c99 -Isrc/include -Wall -Wextra -pedantic -Werror
 
 .PHONY: all run clean bochs
 
-all: $(NAME).bin initrd.img
+all: $(NAME).bin
 
 run: $(NAME).bin initrd.img disk.img
 	$(EMU) -boot order=d -kernel $(NAME).bin -initrd initrd.img -hda disk.img
@@ -41,7 +41,7 @@ initrd.img: tools/make_initrd
 	mkdir -p isodir/boot/grub
 	tools/make_initrd initrd initrd.img
 
-disk.img:
+disk.img: hdd/
 	genext2fs -B 4096 -d hdd -U -N 4096 -b $(HDD_SIZE) disk.img
 
 tools/make_initrd: tools/make_initrd.c
