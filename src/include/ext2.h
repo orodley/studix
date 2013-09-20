@@ -9,8 +9,8 @@ typedef struct Ext2_superblock
 	uint32_t total_inodes;
 	uint32_t total_blocks;
 	uint32_t su_res_blocks;   // How many blocks are reserved for the superuser
-	uint32_t unalloc_blocks;
-	uint32_t unalloc_inodes;
+	uint32_t free_blocks;
+	uint32_t free_inodes;
 	uint32_t superblock_block_num;
 	uint32_t log2_block_size; // (1024 << log2_block_size) = block    size
 	uint32_t log2_frag_size;  // (1024 << log2_frag_size)  = fragment size
@@ -32,5 +32,17 @@ typedef struct Ext2_superblock
 	uint16_t res_block_uid;
 	uint16_t res_block_gid;
 } __attribute__ ((packed)) Ext2_superblock;
+
+typedef struct BGD
+{
+	uint32_t block_bitmap_id;
+	uint32_t inode_bitmap_id;
+	uint32_t inode_table_id;
+	uint16_t free_blocks;
+	uint16_t free_inodes;
+	uint16_t used_dirs;
+	uint16_t pad;
+	uint8_t  bg_reserved[12];
+} __attribute__ ((packed)) BGD;
 
 void init_fs();
