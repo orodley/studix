@@ -1,4 +1,9 @@
-// ext2 filesystem implementation
+/* ext2 filesystem implementation
+ *
+ * Helpful resources used include:
+ *   http://nongnu.org/ext2-doc/ext2.html
+ *   http://wiki.osdev.org/Ext2
+ */
 
 #include <stddef.h>
 #include <stdint.h>
