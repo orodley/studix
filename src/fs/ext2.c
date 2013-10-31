@@ -53,10 +53,11 @@ void load_superblock()
 	term_printf(" BGDT size    = %b\n", sizeof(BGD) * num_groups);
 }
 
-void load_bgdt()
+static void load_bgdt()
 {
 	size_t bgdt_sectors = (sizeof(BGD) * num_groups) / SECTOR_SIZE + 1;
-	size_t bgdt_lba = (SUPERBLOCK_OFFSET + SUPERBLOCK_LENGTH) / block_size + 1;
+	size_t bgdt_block = (SUPERBLOCK_OFFSET + SUPERBLOCK_LENGTH) / block_size + 1;
+	size_t bgdt_lba = bgdt_block * block_size / SECTOR_SIZE;
 
 	uint16_t buf[bgdt_sectors * SECTOR_SIZE / 2];
 	read_abs_sectors(bgdt_lba, bgdt_sectors, buf);
