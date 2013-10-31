@@ -1,6 +1,7 @@
 #include <stdint.h>
 
-// Structure of an ext2 superblock
+// First, structures and constants corresponding to stuff in the ext2 spec
+
 // NOTE: The values in the superblock header are stored little-endian and read
 // in from the drive in 16-bit units. This happens to work fine for us since
 // we're on x86, but this won't work as is on big-endian architectures!
@@ -33,7 +34,7 @@ typedef struct Ext2_superblock
 	uint16_t res_block_gid;
 } __attribute__ ((packed)) Ext2_superblock;
 
-// Structure of a block group descriptor
+// Block group descriptor
 typedef struct BGD
 {
 	uint32_t block_bitmap_addr;
@@ -132,5 +133,26 @@ typedef struct Ext2_inode
 // ...
 // Various other flags are defined that I don't care about for now. I'll bother
 // adding them if I ever support them
+
+
+// Implementation-specific stuff
+
+// Represents an open file handle
+// TODO: support reading from indirect (and doubly-/trebly- so) blocks. At the
+// moment we only support files < 12 * block_size bytes; somewhere between
+// 12KiB and 49KiB
+typedef struct Ext2_file
+{
+	// Inode of the file that's open
+	Ext2_inode inode;
+	// Current position in the whole file, in bytes
+	size_t     pos;
+	// Index of the block we're currently in
+	uint8_t    block_index;
+	// Buffer containing the data in the current block
+	uint8_t   *buf;
+	// Position in the current block
+	size_t     curr_block_pos;
+} Ext2_file;
 
 void init_fs();

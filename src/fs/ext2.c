@@ -5,6 +5,7 @@
  *   http://wiki.osdev.org/Ext2
  */
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
@@ -12,6 +13,7 @@
 #include "ext2.h"
 #include "kmalloc.h"
 #include "pata.h"
+#include "panic.h"
 #include "term.h"
 
 static const uint16_t EXT2_SIGNATURE  = 0xEF53;
@@ -35,6 +37,7 @@ static size_t num_groups;
 
 
 // Prototypes for static functions
+static void read_block(uint32_t block_num, void *buf);
 static void load_superblock();
 static void load_bgdt();
 static void read_inode(Ext2_inode *inode, uint32_t inode_num);
@@ -52,6 +55,14 @@ void init_fs()
 	term_printf(" / creation time = %d\n",   root_inode.creation_time);
 	term_printf(" / uid           = %d\n",   root_inode.uid);
 	term_printf(" / type & perms  = 0x%X\n", root_inode.type_and_permissions);
+}
+
+static void read_block(uint32_t block_num, void *buf)
+{
+	uint32_t lba   = block_num * block_size / SECTOR_SIZE;
+	size_t sectors = block_size / SECTOR_SIZE;
+
+	read_abs_sectors(lba, sectors, buf);
 }
 
 static void load_superblock()
@@ -80,7 +91,7 @@ static void load_bgdt()
 {
 	size_t bgdt_sectors = (sizeof(BGD) * num_groups) / SECTOR_SIZE + 1;
 	size_t bgdt_block = (SUPERBLOCK_OFFSET + SUPERBLOCK_LENGTH) / block_size + 1;
-	size_t bgdt_lba = bgdt_block * block_size / SECTOR_SIZE;
+	uint32_t bgdt_lba = bgdt_block * block_size / SECTOR_SIZE;
 
 	uint16_t buf[bgdt_sectors * SECTOR_SIZE / 2];
 	read_abs_sectors(bgdt_lba, bgdt_sectors, buf);
@@ -110,4 +121,51 @@ static void read_inode(Ext2_inode *inode, uint32_t inode_num)
 	uint16_t buf[num_sectors * SECTOR_SIZE / 2];
 	read_abs_sectors(block * block_size / SECTOR_SIZE, num_sectors, buf);
 	memcpy(inode, &buf[offset_in_block / 2], sizeof(Ext2_inode));
+}
+
+static void open_inode(uint32_t inode_num, Ext2_file *file)
+{
+	read_inode(&file->inode, inode_num);
+	file->pos            = 0;
+	file->block_index    = 0;
+	file->buf            = kmalloc(block_size);
+	file->curr_block_pos = 0;
+
+	// Read in the first block immediately
+	read_block(file->inode.dbp[0], file->buf);
+}
+
+static void ext2_read(Ext2_file *file, uint8_t *buf, size_t count)
+{
+	// Check if we would read past the end of the file
+	if (file->pos + count > file->inode.size)
+		count = file->inode.size - file->pos;
+
+	size_t bytes_left = count;
+
+	while (bytes_left > 0) {
+		size_t to_copy  = bytes_left;
+		bool new_buffer = false;
+		// Check if this read will go beyond the current buffer
+		if (file->curr_block_pos + to_copy >= block_size) {
+			to_copy = block_size - file->curr_block_pos;
+			new_buffer = true;
+		}
+
+		// Copy across from the buffer in the *file and advance the position
+		memcpy(buf, file->buf, to_copy);
+		file->curr_block_pos += to_copy;
+		file->pos            += to_copy;
+		bytes_left           -= to_copy;
+
+		// If we read to the end of the buffer then read the next block
+		if (new_buffer) {
+			file->curr_block_pos = 0;
+			file->block_index++;
+			if (file->block_index >= 12)
+				PANIC("Indirect block pointers are currently unsupported");
+
+			read_block(file->inode.dbp[file->block_index], file->buf);
+		}
+	}
 }
