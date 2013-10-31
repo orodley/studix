@@ -95,13 +95,13 @@ typedef struct Ext2_inode
 
 // Type of file; occupies the top hex digit of type_and_permissions
 // TODO: Unify this with the vfs stuff in fs.h somehow?
-#define FIFO      0x1000
-#define CHAR_DEV  0x2000
-#define DIRECTORY 0x4000
-#define BLOCK_DEV 0x6000
-#define REG_FILE  0x8000
-#define SYMLINK   0xA000
-#define SOCKET    0xC000
+#define S_IFIFO  0x1000
+#define S_IFCHR  0x2000
+#define S_IFDIR  0x4000
+#define S_IFBLK  0x6000
+#define S_IFREG  0x8000
+#define S_IFLNK  0xA000
+#define S_IFSOCK 0xC000
 
 // File permissions: occupies the other 3 hex digits of type_and_permissions
 // This should possibly be moved to <sys/stat.h> once it exists, or perhaps
