@@ -33,28 +33,26 @@ static BGD *bgdt;
 static size_t block_size;
 static size_t num_groups;
 
-static void read_inode(Ext2_inode *inode, uint32_t inode_num)
+
+// Prototypes for static functions
+static void load_superblock();
+static void load_bgdt();
+static void read_inode(Ext2_inode *inode, uint32_t inode_num);
+static void open_inode(uint32_t inode_num, Ext2_file *file);
+
+
+void init_fs()
 {
-	inode_num--; // inode numbers start at 1, change to 0-based index
-	size_t block_group = inode_num / superblock.inodes_per_group;
+	load_superblock();
+	load_bgdt();
 
-	// Look up the starting block in the BGDT
-	BGD *bgd = &bgdt[block_group];
-	uint32_t i_table_block = bgd->inode_table_addr;
-
-	// Now figure out how many blocks the inode we want is offset by
-	size_t index           = inode_num % superblock.inodes_per_group;
-	size_t block_offset    = (index * INODE_SIZE) / block_size;
-	size_t offset_in_block = (index * INODE_SIZE) % block_size;
-	size_t block           = i_table_block + block_offset;
-
-	// Read however many sectors we need to, then copy
-	size_t num_sectors = sizeof(Ext2_inode) / SECTOR_SIZE + 1;
-	uint16_t buf[num_sectors * SECTOR_SIZE / 2];
-	read_abs_sectors(block * block_size / SECTOR_SIZE, num_sectors, buf);
-	memcpy(inode, &buf[offset_in_block / 2], sizeof(Ext2_inode));
+	// Read the root inode, just for fun
+	Ext2_inode root_inode;
+	read_inode(&root_inode, ROOT_INODE);
+	term_printf(" / creation time = %d\n",   root_inode.creation_time);
+	term_printf(" / uid           = %d\n",   root_inode.uid);
+	term_printf(" / type & perms  = 0x%X\n", root_inode.type_and_permissions);
 }
-
 
 static void load_superblock()
 {
@@ -92,15 +90,24 @@ static void load_bgdt()
 	memcpy(bgdt, buf, bgdt_size);
 }
 
-void init_fs()
+static void read_inode(Ext2_inode *inode, uint32_t inode_num)
 {
-	load_superblock();
-	load_bgdt();
+	inode_num--; // inode numbers start at 1, change to 0-based index
+	size_t block_group = inode_num / superblock.inodes_per_group;
 
-	// Read the root inode, just for fun
-	Ext2_inode root_inode;
-	read_inode(&root_inode, ROOT_INODE);
-	term_printf(" / creation time = %d\n",   root_inode.creation_time);
-	term_printf(" / uid           = %d\n",   root_inode.uid);
-	term_printf(" / type & perms  = 0x%X\n", root_inode.type_and_permissions);
+	// Look up the starting block in the BGDT
+	BGD *bgd = &bgdt[block_group];
+	uint32_t i_table_block = bgd->inode_table_addr;
+
+	// Now figure out how many blocks the inode we want is offset by
+	size_t index           = inode_num % superblock.inodes_per_group;
+	size_t block_offset    = (index * INODE_SIZE) / block_size;
+	size_t offset_in_block = (index * INODE_SIZE) % block_size;
+	size_t block           = i_table_block + block_offset;
+
+	// Read however many sectors we need to, then copy
+	size_t num_sectors = sizeof(Ext2_inode) / SECTOR_SIZE + 1;
+	uint16_t buf[num_sectors * SECTOR_SIZE / 2];
+	read_abs_sectors(block * block_size / SECTOR_SIZE, num_sectors, buf);
+	memcpy(inode, &buf[offset_in_block / 2], sizeof(Ext2_inode));
 }
