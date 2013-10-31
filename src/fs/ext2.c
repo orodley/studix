@@ -42,6 +42,7 @@ static void load_superblock();
 static void load_bgdt();
 static void read_inode(Ext2_inode *inode, uint32_t inode_num);
 static void open_inode(uint32_t inode_num, Ext2_file *file);
+static void next_dirent(Ext2_file *file, Ext2_dirent *dir);
 
 
 void init_fs()
@@ -55,6 +56,19 @@ void init_fs()
 	term_printf(" / creation time = %d\n",   root_inode.creation_time);
 	term_printf(" / uid           = %d\n",   root_inode.uid);
 	term_printf(" / type & perms  = 0x%X\n", root_inode.type_and_permissions);
+	term_printf(" / size          = %d\n",   root_inode.size);
+
+	// Enumerate the files in it
+	term_puts(" / files:");
+
+	Ext2_file file;
+	open_inode(ROOT_INODE, &file);
+	Ext2_dirent dirent;
+	for (size_t n = 0; n < 3; n++) {
+		next_dirent(&file, &dirent);
+		term_printf("  %d: inode %d, name `%s'\n",
+				n, dirent.inode_num, dirent.name);
+	}
 }
 
 static void read_block(uint32_t block_num, void *buf)
@@ -135,31 +149,31 @@ static void open_inode(uint32_t inode_num, Ext2_file *file)
 	read_block(file->inode.dbp[0], file->buf);
 }
 
-static void ext2_read(Ext2_file *file, uint8_t *buf, size_t count)
+static size_t ext2_read(Ext2_file *file, uint8_t *buf, size_t count)
 {
 	// Check if we would read past the end of the file
 	if (file->pos + count > file->inode.size)
 		count = file->inode.size - file->pos;
 
-	size_t bytes_left = count;
+	size_t bytes_left   = count;
 
 	while (bytes_left > 0) {
-		size_t to_copy  = bytes_left;
-		bool new_buffer = false;
+		size_t to_copy = bytes_left;
+
 		// Check if this read will go beyond the current buffer
-		if (file->curr_block_pos + to_copy >= block_size) {
+		bool new_block = file->curr_block_pos + to_copy >= block_size;
+		if (new_block)
 			to_copy = block_size - file->curr_block_pos;
-			new_buffer = true;
-		}
 
 		// Copy across from the buffer in the *file and advance the position
-		memcpy(buf, file->buf, to_copy);
+		memcpy(buf + (count - bytes_left),
+				file->buf + file->curr_block_pos, to_copy);
 		file->curr_block_pos += to_copy;
 		file->pos            += to_copy;
 		bytes_left           -= to_copy;
 
 		// If we read to the end of the buffer then read the next block
-		if (new_buffer) {
+		if (new_block) {
 			file->curr_block_pos = 0;
 			file->block_index++;
 			if (file->block_index >= 12)
@@ -167,5 +181,33 @@ static void ext2_read(Ext2_file *file, uint8_t *buf, size_t count)
 
 			read_block(file->inode.dbp[file->block_index], file->buf);
 		}
+	}
+
+	return count;
+}
+
+#define READ_SIZE (sizeof(Ext2_dirent) - sizeof(uint8_t*))
+
+static void next_dirent(Ext2_file *file, Ext2_dirent *dir)
+{
+	uint8_t buf[READ_SIZE];
+	if (ext2_read(file, buf, READ_SIZE) != READ_SIZE) // Not enough data left
+		return; // TODO: Handle this case better
+
+	memcpy(dir, buf, READ_SIZE);
+
+	size_t size   = dir->name_len + 1;
+	uint8_t *name = kmalloc(size);
+	if (ext2_read(file, name, size - 1) != size - 1)
+		return; // TODO: Same as above
+
+	dir->name = name;
+	dir->name[size - 1] = '\0';
+
+	// Read up to the next entry
+	size_t bytes_left = dir->total_len - (READ_SIZE + size - 1);
+	if (bytes_left > 0) {
+		uint8_t dummy[bytes_left];
+		ext2_read(file, dummy, bytes_left);
 	}
 }

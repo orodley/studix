@@ -134,6 +134,18 @@ typedef struct Ext2_inode
 // Various other flags are defined that I don't care about for now. I'll bother
 // adding them if I ever support them
 
+// Directory entry; a directory file's data is composed of these
+typedef struct Ext2_dirent
+{
+	uint32_t  inode_num;
+	uint16_t  total_len;
+	uint8_t   name_len;
+	uint8_t   type_indicator;
+	// The filesystem doesn't actually contain a pointer of course, but as it
+	// is variable length this is best we can do
+	uint8_t  *name;
+} __attribute__ ((packed)) Ext2_dirent;
+
 
 // Implementation-specific stuff
 
