@@ -1,4 +1,4 @@
-// Basic filesystem stuff
+// Virtual filesystem stuff
 
 #include <stdbool.h>
 #include <stddef.h>

@@ -94,7 +94,7 @@ typedef struct Ext2_inode
 } __attribute__ ((packed)) Ext2_inode;
 
 // Type of file; occupies the top hex digit of type_and_permissions
-// TODO: Unify this with the vfs stuff in fs.h somehow?
+// TODO: Unify this with the vfs stuff in vfs.h somehow?
 #define S_IFIFO  0x1000
 #define S_IFCHR  0x2000
 #define S_IFDIR  0x4000

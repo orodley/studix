@@ -2,7 +2,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include "fs.h"
+#include "vfs.h"
 
 #define MAX_FILES 64
 

@@ -1,7 +1,7 @@
 // Filesystem functions
 
 #include <stddef.h>
-#include "fs.h"
+#include "vfs.h"
 
 FS_node *fs_root = NULL;
 
