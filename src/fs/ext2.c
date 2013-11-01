@@ -42,7 +42,7 @@ static void load_superblock();
 static void load_bgdt();
 static void read_inode(Ext2_inode *inode, uint32_t inode_num);
 static void open_inode(uint32_t inode_num, Ext2_file *file);
-static void next_dirent(Ext2_file *file, Ext2_dirent *dir);
+static bool next_dirent(Ext2_file *file, Ext2_dirent *dir);
 
 
 void init_fs()
@@ -64,11 +64,11 @@ void init_fs()
 	Ext2_file file;
 	open_inode(ROOT_INODE, &file);
 	Ext2_dirent dirent;
-	for (size_t n = 0; n < 3; n++) {
-		next_dirent(&file, &dirent);
-		term_printf("  %d: inode %d, name `%s'\n",
-				n, dirent.inode_num, dirent.name);
+	while (next_dirent(&file, &dirent)) {
+		term_printf("  inode %d, name `%s'\n", dirent.inode_num, dirent.name);
 	}
+
+	kfree(file.buf);
 }
 
 static void read_block(uint32_t block_num, void *buf)
@@ -188,18 +188,20 @@ static size_t ext2_read(Ext2_file *file, uint8_t *buf, size_t count)
 
 #define READ_SIZE (sizeof(Ext2_dirent) - sizeof(uint8_t*))
 
-static void next_dirent(Ext2_file *file, Ext2_dirent *dir)
+// Returns true if a new direntry was read, otherwise false, indicating that
+// all of the entries have been read
+static bool next_dirent(Ext2_file *file, Ext2_dirent *dir)
 {
 	uint8_t buf[READ_SIZE];
 	if (ext2_read(file, buf, READ_SIZE) != READ_SIZE) // Not enough data left
-		return; // TODO: Handle this case better
+		return false;
 
 	memcpy(dir, buf, READ_SIZE);
 
 	size_t size   = dir->name_len + 1;
 	uint8_t *name = kmalloc(size);
 	if (ext2_read(file, name, size - 1) != size - 1)
-		return; // TODO: Same as above
+		return false;
 
 	dir->name = name;
 	dir->name[size - 1] = '\0';
@@ -210,4 +212,6 @@ static void next_dirent(Ext2_file *file, Ext2_dirent *dir)
 		uint8_t dummy[bytes_left];
 		ext2_read(file, dummy, bytes_left);
 	}
+
+	return true;
 }
