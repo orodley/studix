@@ -37,12 +37,13 @@ static size_t num_groups;
 
 
 // Prototypes for static functions
-static void read_block(uint32_t block_num, void *buf);
-static void load_superblock();
-static void load_bgdt();
-static void read_inode(Ext2_inode *inode, uint32_t inode_num);
-static void open_inode(uint32_t inode_num, Ext2_file *file);
-static bool next_dirent(Ext2_file *file, Ext2_dirent *dir);
+static void     read_block(uint32_t block_num, void *buf);
+static void     load_superblock();
+static void     load_bgdt();
+static void     read_inode(Ext2_inode *inode, uint32_t inode_num);
+static void     open_inode(uint32_t inode_num, Ext2_file *file);
+static bool     next_dirent(Ext2_file *file, Ext2_dirent *dir);
+static uint32_t find_in_dir(uint32_t dir_inode, const char *name);
 
 
 void init_fs()
@@ -64,11 +65,20 @@ void init_fs()
 	Ext2_file file;
 	open_inode(ROOT_INODE, &file);
 	Ext2_dirent dirent;
+
 	while (next_dirent(&file, &dirent)) {
 		term_printf("  inode %d, name `%s'\n", dirent.inode_num, dirent.name);
 	}
 
 	kfree(file.buf);
+
+	// Look for a file
+	term_putsn(" looking for file `foo'...");
+	uint32_t inode = find_in_dir(ROOT_INODE, "foo");
+	if (inode == 0)
+		term_puts(" not found");
+	else
+		term_printf(" found: inode = %d\n", inode);
 }
 
 static void read_block(uint32_t block_num, void *buf)
@@ -198,7 +208,7 @@ static bool next_dirent(Ext2_file *file, Ext2_dirent *dir)
 
 	memcpy(dir, buf, READ_SIZE);
 
-	size_t size   = dir->name_len + 1;
+	size_t   size = dir->name_len + 1;
 	uint8_t *name = kmalloc(size);
 	if (ext2_read(file, name, size - 1) != size - 1)
 		return false;
@@ -214,4 +224,26 @@ static bool next_dirent(Ext2_file *file, Ext2_dirent *dir)
 	}
 
 	return true;
+}
+
+// Returns true if the file was found
+static uint32_t find_in_dir(uint32_t dir_inode, const char *name)
+{
+	uint32_t inode;
+	Ext2_file dir;
+	Ext2_dirent dirent;
+
+	open_inode(dir_inode, &dir);
+	while (next_dirent(&dir, &dirent)) {
+		if (strcmp((char*)dirent.name, name) == 0) {
+			inode = dirent.inode_num;
+			goto cleanup;
+		}
+	}
+
+	inode = 0;
+
+cleanup:
+	kfree(dir.buf);
+	return inode; // inodes are 1-based, so 0 can be used as an error value
 }
