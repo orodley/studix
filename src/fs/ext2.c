@@ -44,6 +44,7 @@ static void     read_inode(Ext2_inode *inode, uint32_t inode_num);
 static void     open_inode(uint32_t inode_num, Ext2_file *file);
 static bool     next_dirent(Ext2_file *file, Ext2_dirent *dir);
 static uint32_t find_in_dir(uint32_t dir_inode, const char *name);
+static uint32_t look_up_path(char *path);
 
 
 void init_fs()
@@ -73,8 +74,8 @@ void init_fs()
 	kfree(file.buf);
 
 	// Look for a file
-	term_putsn(" looking for file `foo'...");
-	uint32_t inode = find_in_dir(ROOT_INODE, "foo");
+	term_putsn(" looking for file `/bar/baz/quux'...");
+	uint32_t inode = look_up_path("/bar/baz/quux");
 	if (inode == 0)
 		term_puts(" not found");
 	else
@@ -246,4 +247,38 @@ static uint32_t find_in_dir(uint32_t dir_inode, const char *name)
 cleanup:
 	kfree(dir.buf);
 	return inode; // inodes are 1-based, so 0 can be used as an error value
+}
+
+// Return the inode corrsponding to the absolute pathname in `path'
+static uint32_t look_up_path(char *path)
+{
+	if (path[0] != '/') // Path must be absolute
+		return 0;
+
+	path++;
+	uint32_t curr_dir_inode = ROOT_INODE;
+
+	for (;;) {
+		size_t j;
+		for (j = 0; path[j] != '/' && path[j] != '\0'; j++)
+			;
+
+		if (path[j] == '\0')
+			break;
+
+		path[j] = '\0';
+		curr_dir_inode = find_in_dir(curr_dir_inode, path);
+		path[j] = '/';
+
+		if (curr_dir_inode == 0)
+			return 0;
+
+		path += j + 1;
+	}
+
+	uint32_t inode = find_in_dir(curr_dir_inode, path);
+	if (inode == 0)
+		return 0;
+
+	return inode;
 }
