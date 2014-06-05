@@ -1,16 +1,16 @@
-NAME     = studix
-NAME    := $(NAME)-$(shell git describe)
-CC       = i586-elf-gcc
-LD       = $(CC)
-AS       = i586-elf-as
-CFLAGS   = -c -std=c99 -ffreestanding -Isrc/lib -Isrc/include -Wall -Wextra \
-           -pedantic -Werror -Wno-unused-parameter -DNAME=\"$(NAME)\"
-LDFLAGS  = -ffreestanding -nostdlib -lgcc
-EMU      = qemu-system-i386
-VPATH    = src
-ASM_OBJS = $(patsubst %.s, %.o, $(shell find src -name '*.s'))
-C_OBJS   = $(patsubst %.c, %.o, $(shell find src -name '*.c'))
-OBJS     = $(C_OBJS) $(ASM_OBJS)
+NAME      = studix
+NAME     := $(NAME)-$(shell git describe)
+CC        = i586-elf-gcc
+LD        = $(CC)
+AS        = i586-elf-as
+CFLAGS    = -c -std=c99 -ffreestanding -Isrc/lib -Isrc/include -Wall -Wextra \
+            -pedantic -Werror -Wno-unused-parameter -DNAME=\"$(NAME)\"
+LDFLAGS   = -ffreestanding -nostdlib -lgcc
+EMU       = qemu-system-i386
+VPATH     = src
+ASM_OBJS := $(patsubst %.s, %.o, $(shell find src -name '*.s'))
+C_OBJS   := $(patsubst %.c, %.o, $(shell find src -name '*.c'))
+OBJS     := $(C_OBJS) $(ASM_OBJS)
 
 HDD_SIZE = 65536 # 256 MiB
 
