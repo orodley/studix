@@ -1,4 +1,5 @@
 // Virtual filesystem stuff
+// TODO: Lots of the types here should be changed, e.g.: uint32_t -> ssize_t
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -37,10 +38,13 @@ typedef struct FS_node
 	uint32_t        permissions;
 	uint32_t        uid;
 	uint32_t        gid;
-	uint32_t        impl;
 	Node_type       type;
 
-	struct FS_node *node_ptr; // Used in symlinks and mountpoints
+	// Used in symlinks and mountpoints
+	struct FS_node *node_ptr;
+
+	// FS implementation specific stuff
+	void            *impl;
 
 	// Standard file functions
 	Read            read;

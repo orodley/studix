@@ -3,6 +3,9 @@
  * Helpful resources used include:
  *   http://nongnu.org/ext2-doc/ext2.html
  *   http://wiki.osdev.org/Ext2
+ *
+ * TODO: all the non-static functions here should be have ext2 somewhere in
+ * their name for namespacing.
  */
 
 #include <stdbool.h>
@@ -15,17 +18,6 @@
 #include "pata.h"
 #include "panic.h"
 #include "term.h"
-
-static const uint16_t EXT2_SIGNATURE  = 0xEF53;
-static const uint16_t INODE_SIZE      = 128;
-static const uint32_t ROOT_INODE      = 2;
-
-static const size_t SUPERBLOCK_OFFSET = 1024;
-static const size_t SUPERBLOCK_LENGTH = 1024;
-
-// Can't be consts, as the initializers contain consts
-#define             SUPERBLOCK_LBA      (SUPERBLOCK_OFFSET / SECTOR_SIZE)
-#define             SUPERBLOCK_SECTORS  (SUPERBLOCK_LENGTH / SECTOR_SIZE)
 
 static Ext2_superblock         superblock;
 static BGD *bgdt;
@@ -41,10 +33,6 @@ static void     read_block(uint32_t block_num, void *buf);
 static void     load_superblock();
 static void     load_bgdt();
 static void     read_inode(Ext2_inode *inode, uint32_t inode_num);
-static void     open_inode(uint32_t inode_num, Ext2_file *file);
-static bool     next_dirent(Ext2_file *file, Ext2_dirent *dir);
-static uint32_t find_in_dir(uint32_t dir_inode, const char *name);
-static uint32_t look_up_path(char *path);
 
 
 void init_fs()
@@ -148,7 +136,7 @@ static void read_inode(Ext2_inode *inode, uint32_t inode_num)
 	memcpy(inode, &buf[offset_in_block / 2], sizeof(Ext2_inode));
 }
 
-static void open_inode(uint32_t inode_num, Ext2_file *file)
+void open_inode(uint32_t inode_num, Ext2_file *file)
 {
 	read_inode(&file->inode, inode_num);
 	file->pos            = 0;
@@ -160,7 +148,7 @@ static void open_inode(uint32_t inode_num, Ext2_file *file)
 	read_block(file->inode.dbp[0], file->buf);
 }
 
-static size_t ext2_read(Ext2_file *file, uint8_t *buf, size_t count)
+size_t ext2_read(Ext2_file *file, uint8_t *buf, size_t count)
 {
 	// Check if we would read past the end of the file
 	if (file->pos + count > file->inode.size)
@@ -201,7 +189,7 @@ static size_t ext2_read(Ext2_file *file, uint8_t *buf, size_t count)
 
 // Returns true if a new direntry was read, otherwise false, indicating that
 // all of the entries have been read
-static bool next_dirent(Ext2_file *file, Ext2_dirent *dir)
+bool next_dirent(Ext2_file *file, Ext2_dirent *dir)
 {
 	uint8_t buf[READ_SIZE];
 	if (ext2_read(file, buf, READ_SIZE) != READ_SIZE) // Not enough data left
@@ -227,8 +215,8 @@ static bool next_dirent(Ext2_file *file, Ext2_dirent *dir)
 	return true;
 }
 
-// Returns true if the file was found
-static uint32_t find_in_dir(uint32_t dir_inode, const char *name)
+// Returns the inode number of the file if found, and 0 otherwise
+uint32_t find_in_dir(uint32_t dir_inode, const char *name)
 {
 	uint32_t inode;
 	Ext2_file dir;
@@ -250,7 +238,7 @@ cleanup:
 }
 
 // Return the inode corrsponding to the absolute pathname in `path'
-static uint32_t look_up_path(char *path)
+uint32_t look_up_path(char *path)
 {
 	if (path[0] != '/') // Path must be absolute
 		return 0;

@@ -1,6 +1,19 @@
+#include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 // First, structures and constants corresponding to stuff in the ext2 spec
+
+#define EXT2_SIGNATURE  0xEF53
+#define INODE_SIZE         128
+#define ROOT_INODE           2
+
+#define SUPERBLOCK_OFFSET 1024
+#define SUPERBLOCK_LENGTH 1024
+
+#define SUPERBLOCK_LBA     (SUPERBLOCK_OFFSET / SECTOR_SIZE)
+#define SUPERBLOCK_SECTORS (SUPERBLOCK_LENGTH / SECTOR_SIZE)
+
 
 // NOTE: The values in the superblock header are stored little-endian and read
 // in from the drive in 16-bit units. This happens to work fine for us since
@@ -168,3 +181,8 @@ typedef struct Ext2_file
 } Ext2_file;
 
 void init_fs();
+void open_inode(uint32_t inode_num, Ext2_file *file);
+bool next_dirent(Ext2_file *file, Ext2_dirent *dir);
+uint32_t find_in_dir(uint32_t dir_inode, const char *name);
+size_t ext2_read(Ext2_file *file, uint8_t *buf, size_t count);
+uint32_t look_up_path(char *path);

@@ -84,7 +84,7 @@ FS_node *init_initrd(uintptr_t location)
 	initrd_root->read_dir    = initrd_read_dir;
 	initrd_root->find_dir    = initrd_find_dir;
 	initrd_root->node_ptr    = NULL;
-	initrd_root->impl        = 0;
+	initrd_root->impl        = NULL;
 
 	// Set up /dev
 	initrd_dev = (FS_node*)kmalloc(sizeof(FS_node));
@@ -102,7 +102,7 @@ FS_node *init_initrd(uintptr_t location)
 	initrd_dev->read_dir    = initrd_read_dir;
 	initrd_dev->find_dir    = initrd_find_dir;
 	initrd_dev->node_ptr    = NULL;
-	initrd_dev->impl        = 0;
+	initrd_dev->impl        = NULL;
 
 	size_t num_files = *(uint8_t*)initrd_start;
 	root_nodes = (FS_node*)kmalloc(sizeof(FS_node) * num_files);
@@ -127,7 +127,7 @@ FS_node *init_initrd(uintptr_t location)
 		root_nodes[i].close       = NULL;
 		root_nodes[i].read_dir    = NULL;
 		root_nodes[i].find_dir    = NULL;
-		root_nodes[i].impl        = 0;
+		root_nodes[i].impl        = NULL;
 	}
 
 	return initrd_root;
