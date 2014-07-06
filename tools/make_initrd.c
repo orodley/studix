@@ -97,7 +97,7 @@ int write_initrd(char *source_dir, char *output_file)
 	write(output_fd, &num_files, 1);
 	close(output_fd);
 
-	printf("Done! Created ramdisk image '%s', with %d file(s), and size %uB\n",
+	printf("Done! Created ramdisk image '%s', with %zu file(s), and size %zuB\n",
 			output_file, num_files, end);
 	return 0;
 }
