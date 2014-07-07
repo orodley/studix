@@ -10,13 +10,13 @@
 
 static void ext2_vfs_open(FS_node *node)
 {
-	node->inode = look_up_path(node->name);
+	node->inode = ext2_look_up_path(node->name);
 
 	if (node->inode != 0) {
 		// TODO: We need some way of reporting errors rather than silently
 		// failing if look_up_path fails
 		Ext2_file *file = kmalloc(sizeof *file);
-		open_inode(node->inode, file);
+		ext2_open_inode(node->inode, file);
 
 		// We use node->impl to store a pointer to our Ext2_file structure for
 		// Ext2 FS_nodes
@@ -54,7 +54,7 @@ static Dir_entry *ext2_vfs_read_dir(FS_node *node, size_t index)
 {
 	Ext2_dirent ext2_dir;
 
-	if (next_dirent(node->impl, &ext2_dir)) {
+	if (ext2_next_dirent(node->impl, &ext2_dir)) {
 		Dir_entry *dir = kmalloc(sizeof *dir);
 
 		dir->inode = ext2_dir.inode_num;
@@ -70,7 +70,7 @@ static Dir_entry *ext2_vfs_read_dir(FS_node *node, size_t index)
 // TODO: not sure how this is supposed to interact with opening the file
 static FS_node *ext2_vfs_find_dir(FS_node *node, char *name)
 {
-	uint32_t inode = find_in_dir(node->inode, name);
+	uint32_t inode = ext2_find_in_dir(node->inode, name);
 	if (inode == 0) {
 		return NULL;
 	} else {

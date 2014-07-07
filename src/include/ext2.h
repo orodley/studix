@@ -180,9 +180,9 @@ typedef struct Ext2_file
 	size_t     curr_block_pos;
 } Ext2_file;
 
-void init_fs();
-void open_inode(uint32_t inode_num, Ext2_file *file);
-bool next_dirent(Ext2_file *file, Ext2_dirent *dir);
-uint32_t find_in_dir(uint32_t dir_inode, const char *name);
+void ext2_init_fs();
+void ext2_open_inode(uint32_t inode_num, Ext2_file *file);
 size_t ext2_read(Ext2_file *file, uint8_t *buf, size_t count);
-uint32_t look_up_path(char *path);
+bool ext2_next_dirent(Ext2_file *file, Ext2_dirent *dir);
+uint32_t ext2_find_in_dir(uint32_t dir_inode, const char *name);
+uint32_t ext2_look_up_path(char *path);

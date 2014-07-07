@@ -3,9 +3,6 @@
  * Helpful resources used include:
  *   http://nongnu.org/ext2-doc/ext2.html
  *   http://wiki.osdev.org/Ext2
- *
- * TODO: all the non-static functions here should be have ext2 somewhere in
- * their name for namespacing.
  */
 
 #include <stdbool.h>
@@ -22,20 +19,18 @@
 static Ext2_superblock         superblock;
 static BGD *bgdt;
 
-
 // Some figures we need to calculate once we've read the superblock
 static size_t block_size;
 static size_t num_groups;
 
-
 // Prototypes for static functions
-static void     read_block(uint32_t block_num, void *buf);
-static void     load_superblock();
-static void     load_bgdt();
-static void     read_inode(Ext2_inode *inode, uint32_t inode_num);
+static void read_block(uint32_t block_num, void *buf);
+static void load_superblock();
+static void load_bgdt();
+static void read_inode(Ext2_inode *inode, uint32_t inode_num);
 
 
-void init_fs()
+void ext2_init_fs()
 {
 	load_superblock();
 	load_bgdt();
@@ -52,10 +47,10 @@ void init_fs()
 	term_puts(" / files:");
 
 	Ext2_file file;
-	open_inode(ROOT_INODE, &file);
+	ext2_open_inode(ROOT_INODE, &file);
 	Ext2_dirent dirent;
 
-	while (next_dirent(&file, &dirent)) {
+	while (ext2_next_dirent(&file, &dirent)) {
 		term_printf("  inode %d, name `%s'\n", dirent.inode_num, dirent.name);
 	}
 
@@ -63,7 +58,7 @@ void init_fs()
 
 	// Look for a file
 	term_putsn(" looking for file `/bar/baz/quux'...");
-	uint32_t inode = look_up_path("/bar/baz/quux");
+	uint32_t inode = ext2_look_up_path("/bar/baz/quux");
 	if (inode == 0)
 		term_puts(" not found");
 	else
@@ -136,7 +131,7 @@ static void read_inode(Ext2_inode *inode, uint32_t inode_num)
 	memcpy(inode, &buf[offset_in_block / 2], sizeof(Ext2_inode));
 }
 
-void open_inode(uint32_t inode_num, Ext2_file *file)
+void ext2_open_inode(uint32_t inode_num, Ext2_file *file)
 {
 	read_inode(&file->inode, inode_num);
 	file->pos            = 0;
@@ -189,7 +184,7 @@ size_t ext2_read(Ext2_file *file, uint8_t *buf, size_t count)
 
 // Returns true if a new direntry was read, otherwise false, indicating that
 // all of the entries have been read
-bool next_dirent(Ext2_file *file, Ext2_dirent *dir)
+bool ext2_next_dirent(Ext2_file *file, Ext2_dirent *dir)
 {
 	uint8_t buf[READ_SIZE];
 	if (ext2_read(file, buf, READ_SIZE) != READ_SIZE) // Not enough data left
@@ -216,14 +211,14 @@ bool next_dirent(Ext2_file *file, Ext2_dirent *dir)
 }
 
 // Returns the inode number of the file if found, and 0 otherwise
-uint32_t find_in_dir(uint32_t dir_inode, const char *name)
+uint32_t ext2_find_in_dir(uint32_t dir_inode, const char *name)
 {
 	uint32_t inode;
 	Ext2_file dir;
 	Ext2_dirent dirent;
 
-	open_inode(dir_inode, &dir);
-	while (next_dirent(&dir, &dirent)) {
+	ext2_open_inode(dir_inode, &dir);
+	while (ext2_next_dirent(&dir, &dirent)) {
 		if (strcmp((char*)dirent.name, name) == 0) {
 			inode = dirent.inode_num;
 			goto cleanup;
@@ -238,7 +233,9 @@ cleanup:
 }
 
 // Return the inode corrsponding to the absolute pathname in `path'
-uint32_t look_up_path(char *path)
+// TODO: this isn't actually specific to ext2, maybe it should be part of
+// the VFS using generic operations?
+uint32_t ext2_look_up_path(char *path)
 {
 	if (path[0] != '/') // Path must be absolute
 		return 0;
@@ -255,7 +252,7 @@ uint32_t look_up_path(char *path)
 			break;
 
 		path[j] = '\0';
-		curr_dir_inode = find_in_dir(curr_dir_inode, path);
+		curr_dir_inode = ext2_find_in_dir(curr_dir_inode, path);
 		path[j] = '/';
 
 		if (curr_dir_inode == 0)
@@ -264,7 +261,7 @@ uint32_t look_up_path(char *path)
 		path += j + 1;
 	}
 
-	uint32_t inode = find_in_dir(curr_dir_inode, path);
+	uint32_t inode = ext2_find_in_dir(curr_dir_inode, path);
 	if (inode == 0)
 		return 0;
 

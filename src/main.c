@@ -70,9 +70,9 @@ void kernel_main(Multiboot_info *multiboot)
 	FS_node *root = init_initrd(initrd_addr);
 	term_printf(". Found %u file(s)\n", file_count(root));
 
-	timer_notify(init_ps2, "Initializing PS/2 controller");
-	timer_notify(init_ata, "Initializing ATA controller");
-	timer_notify(init_fs,  "Initializing ext2 filesystem");
+	timer_notify(init_ps2,     "Initializing PS/2 controller");
+	timer_notify(init_ata,     "Initializing ATA controller");
+	timer_notify(ext2_init_fs, "Initializing ext2 filesystem");
 
 	// Allocate some memory, just for fun
 	uintptr_t a = (uintptr_t)kmalloc(8);
