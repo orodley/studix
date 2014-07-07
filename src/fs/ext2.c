@@ -16,7 +16,17 @@
 #include "panic.h"
 #include "term.h"
 
-static Ext2_superblock         superblock;
+#define EXT2_SIGNATURE  0xEF53
+#define INODE_SIZE         128
+#define ROOT_INODE           2
+
+#define SUPERBLOCK_OFFSET 1024
+#define SUPERBLOCK_LENGTH 1024
+
+#define SUPERBLOCK_LBA     (SUPERBLOCK_OFFSET / SECTOR_SIZE)
+#define SUPERBLOCK_SECTORS (SUPERBLOCK_LENGTH / SECTOR_SIZE)
+
+static Ext2_superblock superblock;
 static BGD *bgdt;
 
 // Some figures we need to calculate once we've read the superblock

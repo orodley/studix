@@ -4,9 +4,9 @@
 #include "dev.h"
 #include "term.h"
 
-static const size_t VGA_WIDTH  = 80;
-static const size_t VGA_HEIGHT = 25;
-static const uint16_t CRTC_PORT = 0x3D4;
+#define VGA_WIDTH  80
+#define VGA_HEIGHT 25
+#define CRTC_PORT 0x3D4
 
 static size_t          curr_y      = 0;
 static size_t          curr_x      = 0;

@@ -5,11 +5,11 @@
 #include "term.h"
 #include "dev.h"
 
-static const uint8_t TIMER_CHAN0      = 0x40;
-static const uint8_t TIMER_CMD        = 0x43;
+#define TIMER_CHAN0 0x40
+#define TIMER_CMD   0x43
 
-static const int BASE_FREQUENCY    = 1193180;
-static const int MILLISECOND_FREQ  = 1000;
+#define BASE_FREQUENCY   1193180
+#define MILLISECOND_FREQ 1000
 
 static unsigned long milli_uptime = 0;
 

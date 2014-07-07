@@ -5,45 +5,43 @@
 #include "assert.h"
 #include "dev.h"
 #include "term.h"
+#include "pata.h"
 
-// Misc numbers
-const size_t SECTOR_SIZE = 512;
-
+#define LBA_BITS 28
 
 // Port bases and offsets
-static const uint16_t PRIMARY_BASE      = 0x1F0;
-static const uint16_t SECONDARY_BASE    = 0x170;
-static const uint16_t DATA              =     0;
-static const uint16_t ERROR             =     1;
-static const uint16_t SECTOR_COUNT      =     2;
-static const uint16_t LBA_LOW           =     3;
-static const uint16_t LBA_MID           =     4;
-static const uint16_t LBA_HIGH          =     5;
-static const uint16_t DRIVE_SELECT      =     6;
-static const uint16_t COM_STAT          =     7;
+#define PRIMARY_BASE   0x1F0
+#define SECONDARY_BASE 0x170
+#define DATA               0
+#define ERROR              1
+#define SECTOR_COUNT       2
+#define LBA_LOW            3
+#define LBA_MID            4
+#define LBA_HIGH           5
+#define DRIVE_SELECT       6
+#define COM_STAT           7
 
-static const uint16_t PRI_CONTROL       = 0x3F6;
-static const uint16_t SEC_CONTROL       = 0x376;
+#define PRI_CONTROL    0x3F6
+#define SEC_CONTROL    0x376
 
 
 // Commands
-static const uint8_t  SEL_MASTER        = 0xA0;
-static const uint8_t  SEL_SLAVE         = 0xB0;
-static const uint8_t  IDENTIFY          = 0xEC;
-static const uint8_t  READ_SECTORS      = 0x20;
+#define SEL_MASTER   0xA0
+#define SEL_SLAVE    0xB0
+#define IDENTIFY     0xEC
+#define READ_SECTORS 0x20
 
 
 // Status byte flags
-static const uint8_t  ERR               = 1 << 0;
-static const uint8_t  DRQ               = 1 << 3;
-static const uint8_t  SRV               = 1 << 4;
-static const uint8_t  DF                = 1 << 5;
-static const uint8_t  RDY               = 1 << 6;
-static const uint8_t  BSY               = 1 << 7;
-
+#define ERR (1 << 0)
+#define DRQ (1 << 3)
+#define SRV (1 << 4)
+#define DF  (1 << 5)
+#define RDY (1 << 6)
+#define BSY (1 << 7)
 
 // Interesting indices into the data returned by IDENTIFY
-static const size_t MAX_28LBA_SECTORS = 60;
+#define MAX_28LBA_SECTORS 60
 
 
 // Current drive state information
@@ -161,8 +159,6 @@ static void poll()
 // Buffer must be at least sector_count * SECTOR_SIZE bytes long.
 void read_abs_sectors(uint32_t lba, uint8_t sector_count, uint16_t buf[])
 {
-	const short LBA_BITS = 28;
-
 	// Sanity check; the address shouldn't be more than LBA_BITS bits long
 	ASSERT(lba >> LBA_BITS == 0);
 

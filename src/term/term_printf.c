@@ -28,16 +28,17 @@ static void term_print_dec(long x)
 	term_print_decu(x);
 }
 
+#define LOG2_KIB 10
+
 static void term_print_size(unsigned long size)
 {
-	const int  log2_kib   = 10;
 	const char prefixes[] = "KMGTP";
 
 	int i = 0;
-	for (; (size >> log2_kib * i) > 1024; i++)
+	for (; (size >> LOG2_KIB * i) > 1024; i++)
 		;
 
-	term_print_decu(size >> log2_kib * i);
+	term_print_decu(size >> LOG2_KIB * i);
 
 	if (i > 0) {
 		term_putchar(prefixes[i - 1]);
@@ -47,7 +48,7 @@ static void term_print_size(unsigned long size)
 	term_putchar('B');
 }
 
-static const size_t CASE_DIFF = 32;
+#define CASE_DIFF 32
 
 static void term_print_hex(unsigned int x, bool upper)
 {

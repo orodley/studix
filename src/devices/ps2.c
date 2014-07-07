@@ -6,9 +6,9 @@
 #include "term.h"
 #include "dev.h"
 
-static const uint16_t PS2_DATA = 0x60;
-static const uint16_t PS2_CMD  = 0x64;
-static const uint16_t PS2_STAT = 0x64;
+#define PS2_DATA 0x60
+#define PS2_CMD  0x64
+#define PS2_STAT 0x64
 
 #define LSHIFT_DOWN    0x2A
 #define LSHIFT_UP      0xAA
@@ -17,7 +17,8 @@ static const uint16_t PS2_STAT = 0x64;
 #define ENTER_DOWN     0x1C
 #define BACKSPACE_DOWN 0x0E
 
-static const size_t CASE_DIFF = 32;
+// 'a' - 'A' = 32
+#define CASE_DIFF 32
 
 static bool shift_down = false;
 

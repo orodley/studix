@@ -4,17 +4,6 @@
 
 // First, structures and constants corresponding to stuff in the ext2 spec
 
-#define EXT2_SIGNATURE  0xEF53
-#define INODE_SIZE         128
-#define ROOT_INODE           2
-
-#define SUPERBLOCK_OFFSET 1024
-#define SUPERBLOCK_LENGTH 1024
-
-#define SUPERBLOCK_LBA     (SUPERBLOCK_OFFSET / SECTOR_SIZE)
-#define SUPERBLOCK_SECTORS (SUPERBLOCK_LENGTH / SECTOR_SIZE)
-
-
 // NOTE: The values in the superblock header are stored little-endian and read
 // in from the drive in 16-bit units. This happens to work fine for us since
 // we're on x86, but this won't work as is on big-endian architectures!
