@@ -33,7 +33,7 @@ static void term_put_entry(char c, uint8_t color, size_t x, size_t y)
 
 void init_term()
 {
-	term_color  = make_color(LIGHT_GREY, BLACK);
+	term_color  = make_color(WHITE, BLACK);
 
 	for (size_t y = 0; y < VGA_HEIGHT; y++)
 		for (size_t x = 0; x < VGA_WIDTH; x++)
