@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 // First, structures and constants corresponding to stuff in the ext2 spec
+#define ROOT_INODE 2
 
 // NOTE: The values in the superblock header are stored little-endian and read
 // in from the drive in 16-bit units. This happens to work fine for us since

@@ -18,7 +18,6 @@
 
 #define EXT2_SIGNATURE  0xEF53
 #define INODE_SIZE         128
-#define ROOT_INODE           2
 
 #define SUPERBLOCK_OFFSET 1024
 #define SUPERBLOCK_LENGTH 1024
