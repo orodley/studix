@@ -1,5 +1,6 @@
 // Called by the ASSERT macro
 #include <stdbool.h>
+#include "interrupt.h"
 #include "term.h"
 
 void assert(const char *asserted_expr, const char *filename, const char *func,
@@ -9,7 +10,8 @@ void assert(const char *asserted_expr, const char *filename, const char *func,
 			filename, func, line, asserted_expr);
 
 	// That's it, I'm done
-	__asm__ volatile ("cli");
+	disable_interrupts();
+
 	for (;;)
 		;
 }

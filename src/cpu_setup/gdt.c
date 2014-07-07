@@ -1,11 +1,13 @@
-// Global Descriptor Table setup
+/* Global Descriptor Table setup
+ *
+ * In this file, "limit" refers to the higest address accessible, and
+ * "base" refers to the base address, the lowest address accessible
+ */
 
 #include <stddef.h>
 #include <stdint.h>
 #include "gdt.h"
 
-// In this file, "limit" refers to the higest address accessible, and
-// "base" refers to the base address, the lowest address accessible
 
 typedef struct GDT_entry
 {

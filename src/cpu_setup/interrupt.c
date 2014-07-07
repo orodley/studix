@@ -7,6 +7,16 @@
 #include "term.h"
 #include "panic.h"
 
+void disable_interrupts()
+{
+	__asm__ volatile ("cli");
+}
+
+void enable_interrupts()
+{
+	__asm__ volatile ("sti");
+}
+
 static const char *interrupt_names[] =
 {
 	"Division by zero",

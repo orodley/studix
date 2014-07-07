@@ -5,6 +5,7 @@
 #include "gdt.h"
 #include "idt.h"
 #include "initrd.h"
+#include "interrupt.h"
 #include "kmalloc.h"
 #include "multiboot.h"
 #include "term.h"
@@ -54,7 +55,8 @@ void kernel_main(Multiboot_info *multiboot)
 	notify(init_gdt,   "Initializing GDT");
 	notify(init_idt,   "Initializing IDT");
 	notify(init_timer, "Initializing PIT"); // Now we can use timer_notify()
-	__asm__ volatile ("sti");	// Enable interrupts
+
+	enable_interrupts();
 
 	ASSERT(multiboot->module_count > 0);
 	uintptr_t initrd_addr = *(uintptr_t*)multiboot->modules_addr;

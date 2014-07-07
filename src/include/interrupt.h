@@ -1,5 +1,9 @@
 #include <stdint.h>
 
+// cli/sti wrappers
+void disable_interrupts();
+void enable_interrupts();
+
 // IRQ numbers
 #define IRQ0 32
 #define IRQ1 33
